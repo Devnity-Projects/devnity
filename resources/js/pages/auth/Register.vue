@@ -1,83 +1,101 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthBase from '@/layouts/AuthLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
+import { useForm, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import AuthLayout from '@/Layouts/AuthLayout.vue'
 
 const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-});
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+})
 
-const submit = () => {
-    form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
-    });
-};
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
+
+function submit() {
+  form.post('/register', {
+    onError: () => {},
+    onSuccess: () => {
+      form.reset('password', 'password_confirmation')
+      router.visit('/dashboard')
+    },
+  })
+}
 </script>
 
 <template>
-    <AuthBase title="Create an account" description="Enter your details below to create your account">
-        <Head title="Register" />
-
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="name">Name</Label>
-                    <Input id="name" type="text" required autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Full name" />
-                    <InputError :message="form.errors.name" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input id="email" type="email" required :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@example.com" />
-                    <InputError :message="form.errors.email" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        required
-                        :tabindex="3"
-                        autocomplete="new-password"
-                        v-model="form.password"
-                        placeholder="Password"
-                    />
-                    <InputError :message="form.errors.password" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">Confirm password</Label>
-                    <Input
-                        id="password_confirmation"
-                        type="password"
-                        required
-                        :tabindex="4"
-                        autocomplete="new-password"
-                        v-model="form.password_confirmation"
-                        placeholder="Confirm password"
-                    />
-                    <InputError :message="form.errors.password_confirmation" />
-                </div>
-
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
-                    <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                    Create account
-                </Button>
-            </div>
-
-            <div class="text-center text-sm text-muted-foreground">
-                Already have an account?
-                <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="6">Log in</TextLink>
-            </div>
-        </form>
-    </AuthBase>
+  <AuthLayout>
+    <div class="flex flex-col items-center mb-8">
+      <img src="/images/logo-devnity.png" alt="Devnity Logo" class="w-32 h-32 mb-4 drop-shadow-md" />
+      <h1 class="text-2xl font-bold mt-2 text-[#6a0dad] dark:text-[#b59cff]">Criar conta Devnity</h1>
+      <p class="text-gray-400 dark:text-gray-300 mb-2 text-sm">Cadastro rápido para sua empresa</p>
+    </div>
+    <div class="bg-white dark:bg-[#232336] shadow-2xl rounded-2xl px-10 py-8 w-full max-w-sm">
+      <form @submit.prevent="submit" autocomplete="on">
+        <div v-if="form.errors.name || form.errors.email || form.errors.password" class="mb-4 flex items-center gap-2 bg-[#ffeaea] dark:bg-[#442429] text-[#e55e55] rounded-xl px-4 py-3 border border-[#e55e55]/50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
+          </svg>
+          <span class="font-medium">
+            {{ form.errors.name || form.errors.email || form.errors.password }}
+          </span>
+        </div>
+        <div class="mb-6">
+          <label class="block mb-1 text-[#6a0dad] dark:text-[#b59cff] font-semibold">Nome</label>
+          <input v-model="form.name" type="text" class="w-full rounded-xl border border-[#d1d5db] dark:border-[#444466] px-4 py-3 focus:outline-none focus:border-[#6a0dad] dark:focus:border-[#b59cff] transition bg-white dark:bg-[#1b1b29] text-black dark:text-white" placeholder="Nome completo" autocomplete="name" />
+        </div>
+        <div class="mb-6">
+          <label class="block mb-1 text-[#6a0dad] dark:text-[#b59cff] font-semibold">E-mail</label>
+          <input v-model="form.email" type="email" class="w-full rounded-xl border border-[#d1d5db] dark:border-[#444466] px-4 py-3 focus:outline-none focus:border-[#6a0dad] dark:focus:border-[#b59cff] transition bg-white dark:bg-[#1b1b29] text-black dark:text-white" placeholder="Seu e-mail" autocomplete="email" />
+        </div>
+        <div class="mb-6 relative">
+          <label class="block mb-1 text-[#6a0dad] dark:text-[#b59cff] font-semibold">Senha</label>
+          <input v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            class="w-full rounded-xl border border-[#d1d5db] dark:border-[#444466] px-4 py-3 focus:outline-none focus:border-[#6a0dad] dark:focus:border-[#b59cff] transition bg-white dark:bg-[#1b1b29] text-black dark:text-white"
+            placeholder="Senha" />
+          <button type="button"
+            class="absolute right-4 top-8 text-gray-400 dark:text-gray-300"
+            @click="showPassword = !showPassword"
+            tabindex="-1"
+          >
+            <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#6a0dad" stroke-width="2" d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" stroke="#6a0dad" stroke-width="2"/></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#e55e55" stroke-width="2" d="m3 3 18 18M2 12s4-7 10-7a9.44 9.44 0 0 1 6.49 2.63M22 12s-4 7-10 7a9.44 9.44 0 0 1-6.49-2.63"/><circle cx="12" cy="12" r="3" stroke="#e55e55" stroke-width="2"/></svg>
+          </button>
+        </div>
+        <div class="mb-6 relative">
+          <label class="block mb-1 text-[#6a0dad] dark:text-[#b59cff] font-semibold">Confirmar senha</label>
+          <input v-model="form.password_confirmation"
+            :type="showPasswordConfirmation ? 'text' : 'password'"
+            autocomplete="new-password"
+            class="w-full rounded-xl border border-[#d1d5db] dark:border-[#444466] px-4 py-3 focus:outline-none focus:border-[#6a0dad] dark:focus:border-[#b59cff] transition bg-white dark:bg-[#1b1b29] text-black dark:text-white"
+            placeholder="Confirme sua senha" />
+          <button type="button"
+            class="absolute right-4 top-8 text-gray-400 dark:text-gray-300"
+            @click="showPasswordConfirmation = !showPasswordConfirmation"
+            tabindex="-1"
+          >
+            <svg v-if="!showPasswordConfirmation" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#6a0dad" stroke-width="2" d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" stroke="#6a0dad" stroke-width="2"/></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#e55e55" stroke-width="2" d="m3 3 18 18M2 12s4-7 10-7a9.44 9.44 0 0 1 6.49 2.63M22 12s-4 7-10 7a9.44 9.44 0 0 1-6.49-2.63"/><circle cx="12" cy="12" r="3" stroke="#e55e55" stroke-width="2"/></svg>
+          </button>
+        </div>
+        <button
+          :disabled="form.processing"
+          type="submit"
+          class="w-full bg-[#6a0dad] hover:bg-[#5a089e] text-white font-bold py-3 rounded-xl transition mb-3 shadow"
+        >Criar conta</button>
+        <div class="text-center text-sm">
+          Já possui conta?
+          <a href="/login" class="text-[#6a0dad] dark:text-[#b59cff] font-semibold hover:underline">Entrar</a>
+        </div>
+      </form>
+    </div>
+    <div class="mt-8 text-gray-400 dark:text-gray-500 text-xs text-center">
+      &copy; 2025 Devnity — Sistema de Gestão SaaS<br/>
+      <span class="text-[#e55e55]">Versão beta</span>
+    </div>
+  </AuthLayout>
 </template>

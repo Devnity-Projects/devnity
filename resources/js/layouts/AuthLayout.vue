@@ -1,14 +1,11 @@
-<script setup lang="ts">
-import AuthLayout from '@/layouts/auth/AuthSimpleLayout.vue';
-
-defineProps<{
-    title?: string;
-    description?: string;
-}>();
+<script setup>
+import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 </script>
-
 <template>
-    <AuthLayout :title="title" :description="description">
-        <slot />
-    </AuthLayout>
+  <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#f3f0ff] to-[#fff] dark:from-[#181826] dark:to-[#22223a] transition-colors">
+    <div class="absolute top-4 right-4">
+      <ThemeToggle />
+    </div>
+    <slot />
+  </div>
 </template>
