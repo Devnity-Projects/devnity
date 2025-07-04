@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue'
-import ClientTable from '@/Components/Clients/ClientTable.vue'
-import ClientFilters from '@/Components/Clients/ClientFilters.vue'
+import ClientTable from '@/components/Clients/ClientTable.vue'
+import ClientFilters from '@/components/Clients/ClientFilters.vue'
 import { Link } from '@inertiajs/vue3'
 import { Plus } from 'lucide-vue-next'
 import { ref, computed } from 'vue'

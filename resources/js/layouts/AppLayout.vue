@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import { Home, Users, FolderKanban, ListTodo, LifeBuoy, Sun, Moon, LogOut, User } from 'lucide-vue-next'
 
+import FlashToasts from '@/components/ui/toast/FlashToasts.vue'
 const user = usePage().props.auth?.user
 
 // Dark mode
@@ -42,6 +43,7 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-[#191929] transition-colors duration-500">
+    <FlashToasts />
     <!-- CAMADA 1: Header superior -->
     <header class="w-full bg-white dark:bg-[#232336] shadow z-20 transition-colors duration-500">
       <div class="max-w-screen-2xl mx-auto flex items-center justify-between px-6 h-16">

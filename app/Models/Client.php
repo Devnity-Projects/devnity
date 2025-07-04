@@ -5,23 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// app/Models/Client.php
 class Client extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
-        'contact_name',
+        'type',
+        'document',
         'email',
         'phone',
-        'status',
-        'company',
-        'document',
+        'responsible',
+        'responsible_email',
+        'responsible_phone',
+        'state_registration',
+        'municipal_registration',
+        'zip_code',
         'address',
+        'number',
+        'complement',
+        'neighborhood',
         'city',
         'state',
         'country',
+        'status',
         'notes',
     ];
+
+    protected $casts = [
+        'type'   => 'string',
+        'status' => 'string',
+    ];
 }
-
-

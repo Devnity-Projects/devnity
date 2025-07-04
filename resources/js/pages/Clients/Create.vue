@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue'
-import ClientForm from '@/Components/Clients/ClientForm.vue'
+import ClientForm from '@/components/Clients/ClientForm.vue'
 import { useForm, router } from '@inertiajs/vue3'
 
 const form = useForm({
