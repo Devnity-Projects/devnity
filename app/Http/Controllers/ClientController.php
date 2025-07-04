@@ -8,48 +8,35 @@ use Inertia\Inertia;
 
 class ClientController extends Controller
 {
-    // Listagem de clientes (Index)
     public function index()
     {
-        $clients = Client::orderBy('name')->get();
+        $clients = Client::orderBy('name')->paginate(15);
 
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
         ]);
     }
 
-    // Página de detalhes de cliente (Show)
-    public function show(Client $client)
+    public function create()
     {
-        return Inertia::render('Clients/Show', [
-            'client' => $client,
-        ]);
+        return Inertia::render('Clients/Create');
     }
 
-    // Criação de novo cliente (Store)
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:Pessoa Física,Pessoa Jurídica',
-            'document' => 'required|string|max:20|unique:clients,document',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'responsible' => 'nullable|string|max:255',
-            'responsible_email' => 'nullable|email|max:255',
-            'responsible_phone' => 'nullable|string|max:20',
-            'state_registration' => 'nullable|string|max:20',
-            'municipal_registration' => 'nullable|string|max:20',
-            'zip_code' => 'nullable|string|max:10',
+            'contact_name' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255|unique:clients,email',
+            'phone' => 'nullable|string|max:30',
+            'status' => 'required|string',
+            'company' => 'nullable|string|max:255',
+            'document' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:255',
-            'number' => 'nullable|string|max:10',
-            'complement' => 'nullable|string|max:50',
-            'neighborhood' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:2',
-            'country' => 'nullable|string|max:100',
-            'status' => 'required|in:ativo,inativo',
-            'notes' => 'nullable|string|max:1000',
+            'state' => 'nullable|string|max:50',
+            'country' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
         ]);
 
         Client::create($data);
@@ -57,42 +44,46 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Cliente cadastrado!');
     }
 
-    // Atualização de cliente (Update)
+    public function show(Client $client)
+    {
+        return Inertia::render('Clients/Show', [
+            'client' => $client,
+        ]);
+    }
+
+    public function edit(Client $client)
+    {
+        return Inertia::render('Clients/Edit', [
+            'client' => $client,
+        ]);
+    }
+
     public function update(Request $request, Client $client)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:Pessoa Física,Pessoa Jurídica',
-            'document' => 'required|string|max:20|unique:clients,document,'.$client->id,
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'responsible' => 'nullable|string|max:255',
-            'responsible_email' => 'nullable|email|max:255',
-            'responsible_phone' => 'nullable|string|max:20',
-            'state_registration' => 'nullable|string|max:20',
-            'municipal_registration' => 'nullable|string|max:20',
-            'zip_code' => 'nullable|string|max:10',
+            'contact_name' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255|unique:clients,email,'.$client->id,
+            'phone' => 'nullable|string|max:30',
+            'status' => 'required|string',
+            'company' => 'nullable|string|max:255',
+            'document' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:255',
-            'number' => 'nullable|string|max:10',
-            'complement' => 'nullable|string|max:50',
-            'neighborhood' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:2',
-            'country' => 'nullable|string|max:100',
-            'status' => 'required|in:ativo,inativo',
-            'notes' => 'nullable|string|max:1000',
+            'state' => 'nullable|string|max:50',
+            'country' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
         ]);
 
         $client->update($data);
 
-        return redirect()->route('clients.index')->with('success', 'Cliente atualizado!');
+        return redirect()->route('clients.show', $client)->with('success', 'Cliente atualizado!');
     }
 
-    // Excluir cliente (Destroy)
     public function destroy(Client $client)
     {
         $client->delete();
 
-        return redirect()->route('clients.index')->with('success', 'Cliente removido!');
+        return redirect()->route('clients.index')->with('success', 'Cliente removido.');
     }
 }
