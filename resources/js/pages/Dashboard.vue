@@ -22,8 +22,9 @@ import {
 
 const props = defineProps<{ 
   stats: Record<string, number>
+  recentProjects?: Array<any>
+  urgentTasks?: Array<any>
   recentActivity?: Array<any>
-  upcomingDeadlines?: Array<any>
 }>()
 
 const currentTime = ref(new Date())
@@ -48,27 +49,27 @@ const cards = [
     bgColor: 'bg-purple-50 dark:bg-purple-950/20',
     textColor: 'text-purple-700 dark:text-purple-300',
     link: '/projects',
-    description: 'Projetos em desenvolvimento'
+    description: 'Projetos em andamento'
   },
   {
-    label: 'Propostas',
-    key: 'proposals',
+    label: 'Tarefas',
+    key: 'tasks',
     icon: Briefcase,
     gradient: 'from-emerald-500 to-emerald-600',
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
     textColor: 'text-emerald-700 dark:text-emerald-300',
-    link: '/proposals',
-    description: 'Propostas comerciais ativas'
+    link: '/tasks',
+    description: 'Tarefas em execução'
   },
   {
-    label: 'Suporte',
-    key: 'tickets',
-    icon: LifeBuoy,
-    gradient: 'from-orange-500 to-orange-600',
-    bgColor: 'bg-orange-50 dark:bg-orange-950/20',
-    textColor: 'text-orange-700 dark:text-orange-300',
-    link: '/support',
-    description: 'Tickets de suporte abertos'
+    label: 'Tarefas Atrasadas',
+    key: 'overdue_tasks',
+    icon: AlertCircle,
+    gradient: 'from-red-500 to-red-600',
+    bgColor: 'bg-red-50 dark:bg-red-950/20',
+    textColor: 'text-red-700 dark:text-red-300',
+    link: '/tasks?overdue=1',
+    description: 'Tarefas que passaram do prazo'
   },
 ]
 
@@ -221,35 +222,89 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Atividade recente (placeholder para futuras implementações) -->
+      <!-- Atividade recente e Projetos/Tarefas -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Atividade recente -->
+        <!-- Projetos Recentes -->
         <div class="devnity-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <Activity class="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Atividade Recente</h3>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <FolderKanban class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <h3 class="font-semibold text-gray-900 dark:text-gray-100">Projetos Recentes</h3>
+            </div>
+            <Link 
+              href="/projects" 
+              class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            >
+              Ver todos
+            </Link>
           </div>
           <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <div class="h-2 w-2 bg-green-500 rounded-full"></div>
-              <div class="flex-1">
-                <p class="text-sm text-gray-900 dark:text-gray-100">Sistema inicializado com sucesso</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Agora mesmo</p>
+            <div v-if="props.recentProjects && props.recentProjects.length > 0">
+              <div 
+                v-for="project in props.recentProjects" 
+                :key="project.id"
+                class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <div class="flex-shrink-0">
+                  <div class="h-2 w-2 bg-blue-500 rounded-full"></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {{ project.name }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ project.client?.name }} • {{ project.status }}
+                  </p>
+                </div>
               </div>
+            </div>
+            <div v-else class="text-center py-4">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Nenhum projeto cadastrado
+              </p>
             </div>
           </div>
         </div>
 
-        <!-- Próximos eventos -->
+        <!-- Tarefas Urgentes -->
         <div class="devnity-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <Calendar class="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Próximos Eventos</h3>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <AlertCircle class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <h3 class="font-semibold text-gray-900 dark:text-gray-100">Tarefas Urgentes</h3>
+            </div>
+            <Link 
+              href="/tasks?priority=urgent" 
+              class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            >
+              Ver todas
+            </Link>
           </div>
-          <div class="text-center py-8">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Nenhum evento agendado
-            </p>
+          <div class="space-y-3">
+            <div v-if="props.urgentTasks && props.urgentTasks.length > 0">
+              <div 
+                v-for="task in props.urgentTasks" 
+                :key="task.id"
+                class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <div class="flex-shrink-0">
+                  <div class="h-2 w-2 bg-red-500 rounded-full"></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {{ task.title }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ task.project?.name }} • {{ task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Sem prazo' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-center py-4">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Nenhuma tarefa urgente
+              </p>
+            </div>
           </div>
         </div>
       </div>
