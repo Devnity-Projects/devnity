@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useForm, router } from '@inertiajs/vue3'
+import { useForm, router, Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { Eye, EyeOff, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-vue-next'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
 
 const form = useForm({
@@ -24,61 +25,138 @@ function submit() {
 
 <template>
   <AuthLayout>
-    <div class="flex flex-col items-center mb-8">
-      <img src="/images/logo-devnity.png" alt="Devnity Logo" class="w-32 h-32 mb-4 drop-shadow-md" />
-      <h1 class="text-2xl font-bold mt-2 text-[#6a0dad] dark:text-[#b59cff]">Bem-vindo ao Devnity</h1>
-      <p class="text-gray-400 dark:text-gray-300 mb-2 text-sm">Sistema de Gestão SaaS para empresas</p>
-    </div>
-    <div class="bg-white dark:bg-[#232336] shadow-2xl rounded-2xl px-10 py-8 w-full max-w-sm">
-      <form @submit.prevent="submit" autocomplete="on">
-        <div v-if="form.errors.email || form.errors.password" class="mb-4 flex items-center gap-2 bg-[#ffeaea] dark:bg-[#442429] text-[#e55e55] rounded-xl px-4 py-3 border border-[#e55e55]/50">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
-          </svg>
-          <span class="font-medium">
-            {{ form.errors.email || form.errors.password }}
-          </span>
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="text-center lg:text-left">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          Acesse sua conta
+        </h2>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">
+          Entre com suas credenciais para continuar
+        </p>
+      </div>
+
+      <!-- Error Alert -->
+      <div 
+        v-if="form.errors.email || form.errors.password" 
+        class="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300"
+      >
+        <AlertCircle class="h-5 w-5 flex-shrink-0" />
+        <span class="text-sm font-medium">
+          {{ form.errors.email || form.errors.password }}
+        </span>
+      </div>
+
+      <!-- Login Form -->
+      <form @submit.prevent="submit" class="space-y-6" autocomplete="on">
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            E-mail
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail class="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="email"
+              v-model="form.email"
+              type="email"
+              autocomplete="email"
+              required
+              class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              placeholder="seu@email.com"
+            />
+          </div>
         </div>
-        <div class="mb-6">
-          <label class="block mb-1 text-[#6a0dad] dark:text-[#b59cff] font-semibold">E-mail</label>
-          <input v-model="form.email" type="email" autocomplete="email"
-            class="w-full rounded-xl border border-[#d1d5db] dark:border-[#444466] px-4 py-3 focus:outline-none focus:border-[#6a0dad] dark:focus:border-[#b59cff] transition bg-white dark:bg-[#1b1b29] text-black dark:text-white"
-            placeholder="Seu e-mail" />
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Senha
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock class="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="password"
+              v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="current-password"
+              required
+              class="block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              placeholder="Sua senha"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              tabindex="-1"
+            >
+              <Eye v-if="!showPassword" class="h-5 w-5" />
+              <EyeOff v-else class="h-5 w-5" />
+            </button>
+          </div>
         </div>
-        <div class="mb-6 relative">
-          <label class="block mb-1 text-[#6a0dad] dark:text-[#b59cff] font-semibold">Senha</label>
-          <input v-model="form.password"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="current-password"
-            class="w-full rounded-xl border border-[#d1d5db] dark:border-[#444466] px-4 py-3 focus:outline-none focus:border-[#6a0dad] dark:focus:border-[#b59cff] transition bg-white dark:bg-[#1b1b29] text-black dark:text-white"
-            placeholder="Senha" />
-          <button type="button"
-            class="absolute right-4 top-8 text-gray-400 dark:text-gray-300"
-            @click="showPassword = !showPassword"
-            tabindex="-1"
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input
+              id="remember"
+              v-model="form.remember"
+              type="checkbox"
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
+            />
+            <label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+              Lembrar-me
+            </label>
+          </div>
+          <Link
+            href="/forgot-password"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
           >
-            <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#6a0dad" stroke-width="2" d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" stroke="#6a0dad" stroke-width="2"/></svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#e55e55" stroke-width="2" d="m3 3 18 18M2 12s-4-7 10-7a9.44 9.44 0 0 1 6.49 2.63M22 12s-4 7-10 7a9.44 9.44 0 0 1-6.49-2.63"/><circle cx="12" cy="12" r="3" stroke="#e55e55" stroke-width="2"/></svg>
-          </button>
+            Esqueci minha senha
+          </Link>
         </div>
-        <div class="mb-4 flex items-center gap-2">
-          <input v-model="form.remember" type="checkbox" id="remember" />
-          <label for="remember" class="text-gray-600 dark:text-gray-300">Lembrar-me</label>
-        </div>
+
+        <!-- Submit Button -->
         <button
-          :disabled="form.processing"
           type="submit"
-          class="w-full bg-[#6a0dad] hover:bg-[#5a089e] text-white font-bold py-3 rounded-xl transition mb-3 shadow"
-        >Entrar</button>
-        <div class="text-center text-sm">
-          <a href="/forgot-password" class="text-[#6a0dad] dark:text-[#b59cff] font-semibold hover:underline">Esqueci minha senha</a>
-        </div>
+          :disabled="form.processing"
+          class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white devnity-gradient hover:devnity-gradient-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+        >
+          <span v-if="!form.processing">Entrar</span>
+          <span v-else>Entrando...</span>
+          <ArrowRight v-if="!form.processing" class="h-4 w-4" />
+          <div v-else class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        </button>
       </form>
-    </div>
-    <div class="mt-8 text-gray-400 dark:text-gray-500 text-xs text-center">
-      &copy; 2025 Devnity — Sistema de Gestão SaaS<br/>
-      <span class="text-[#e55e55]">Versão beta</span>
+
+      <!-- Register Link -->
+      <div class="text-center">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Não tem uma conta?
+          <Link
+            href="/register"
+            class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors ml-1"
+          >
+            Criar conta
+          </Link>
+        </p>
+      </div>
+
+      <!-- Demo Credentials (for development) -->
+      <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Credenciais de demonstração:
+        </h4>
+        <div class="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+          <p><strong>Email:</strong> admin@devnity.com</p>
+          <p><strong>Senha:</strong> password</p>
+        </div>
+      </div>
     </div>
   </AuthLayout>
 </template>

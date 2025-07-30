@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
 @import 'tw-animate-css';
 
@@ -8,7 +9,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -48,6 +50,14 @@
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
 
+    /* Devnity Brand Colors */
+    --color-devnity-primary: var(--devnity-primary);
+    --color-devnity-secondary: var(--devnity-secondary);
+    --color-devnity-accent: var(--devnity-accent);
+    --color-devnity-success: var(--devnity-success);
+    --color-devnity-warning: var(--devnity-warning);
+    --color-devnity-error: var(--devnity-error);
+
     --color-sidebar: var(--sidebar-background);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -79,89 +89,245 @@
 @layer utilities {
     body,
     html {
-        --font-sans:
-            'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
     }
 }
 
+/* Devnity Design System - Light Theme */
 :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 92.1%);
-    --secondary-foreground: hsl(0 0% 9%);
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 92.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
-    --chart-1: hsl(12 76% 61%);
-    --chart-2: hsl(173 58% 39%);
-    --chart-3: hsl(197 37% 24%);
-    --chart-4: hsl(43 74% 66%);
-    --chart-5: hsl(27 87% 67%);
+    /* Brand Identity */
+    --devnity-primary: 59 130 246; /* Modern Blue - #3B82F6 */
+    --devnity-secondary: 99 102 241; /* Indigo - #6366F1 */
+    --devnity-accent: 16 185 129; /* Emerald - #10B981 */
+    --devnity-success: 34 197 94; /* Green - #22C55E */
+    --devnity-warning: 251 146 60; /* Orange - #FB923C */
+    --devnity-error: 239 68 68; /* Red - #EF4444 */
+    
+    /* Neutral Palette */
+    --devnity-gray-50: 249 250 251;
+    --devnity-gray-100: 243 244 246;
+    --devnity-gray-200: 229 231 235;
+    --devnity-gray-300: 209 213 219;
+    --devnity-gray-400: 156 163 175;
+    --devnity-gray-500: 107 114 128;
+    --devnity-gray-600: 75 85 99;
+    --devnity-gray-700: 55 65 81;
+    --devnity-gray-800: 31 41 55;
+    --devnity-gray-900: 17 24 39;
+    --devnity-gray-950: 3 7 18;
+
+    /* System Colors */
+    --background: rgb(var(--devnity-gray-50));
+    --foreground: rgb(var(--devnity-gray-900));
+    
+    --card: 255 255 255;
+    --card-foreground: rgb(var(--devnity-gray-900));
+    
+    --popover: 255 255 255;
+    --popover-foreground: rgb(var(--devnity-gray-900));
+    
+    --primary: var(--devnity-primary);
+    --primary-foreground: 255 255 255;
+    
+    --secondary: rgb(var(--devnity-gray-100));
+    --secondary-foreground: rgb(var(--devnity-gray-900));
+    
+    --muted: rgb(var(--devnity-gray-100));
+    --muted-foreground: rgb(var(--devnity-gray-500));
+    
+    --accent: rgb(var(--devnity-gray-100));
+    --accent-foreground: rgb(var(--devnity-gray-900));
+    
+    --destructive: var(--devnity-error);
+    --destructive-foreground: 255 255 255;
+    
+    --border: rgb(var(--devnity-gray-200));
+    --input: rgb(var(--devnity-gray-200));
+    --ring: rgb(var(--devnity-primary));
+    
+    --chart-1: var(--devnity-primary);
+    --chart-2: var(--devnity-secondary);
+    --chart-3: var(--devnity-accent);
+    --chart-4: var(--devnity-warning);
+    --chart-5: var(--devnity-error);
+    
     --radius: 0.5rem;
-    --sidebar-background: hsl(0 0% 98%);
-    --sidebar-foreground: hsl(240 5.3% 26.1%);
-    --sidebar-primary: hsl(0 0% 10%);
-    --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(0 0% 94%);
-    --sidebar-accent-foreground: hsl(0 0% 30%);
-    --sidebar-border: hsl(0 0% 91%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(0 0% 98%);
+    
+    /* Sidebar */
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: rgb(var(--devnity-gray-700));
+    --sidebar-primary: var(--devnity-primary);
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: rgb(var(--devnity-gray-100));
+    --sidebar-accent-foreground: rgb(var(--devnity-gray-700));
+    --sidebar-border: rgb(var(--devnity-gray-200));
+    --sidebar-ring: rgb(var(--devnity-primary));
+    --sidebar: 255 255 255;
 }
 
+/* Devnity Design System - Dark Theme */
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 84% 60%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
-    --chart-1: hsl(220 70% 50%);
-    --chart-2: hsl(160 60% 45%);
-    --chart-3: hsl(30 80% 55%);
-    --chart-4: hsl(280 65% 60%);
-    --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(0 0% 7%);
-    --sidebar-foreground: hsl(0 0% 95.9%);
-    --sidebar-primary: hsl(360, 100%, 100%);
-    --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(0 0% 15.9%);
-    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(240 5.9% 10%);
+    /* System Colors - Dark */
+    --background: rgb(var(--devnity-gray-950));
+    --foreground: rgb(var(--devnity-gray-100));
+    
+    --card: rgb(var(--devnity-gray-900));
+    --card-foreground: rgb(var(--devnity-gray-100));
+    
+    --popover: rgb(var(--devnity-gray-900));
+    --popover-foreground: rgb(var(--devnity-gray-100));
+    
+    --primary: var(--devnity-primary);
+    --primary-foreground: 255 255 255;
+    
+    --secondary: rgb(var(--devnity-gray-800));
+    --secondary-foreground: rgb(var(--devnity-gray-100));
+    
+    --muted: rgb(var(--devnity-gray-800));
+    --muted-foreground: rgb(var(--devnity-gray-400));
+    
+    --accent: rgb(var(--devnity-gray-800));
+    --accent-foreground: rgb(var(--devnity-gray-100));
+    
+    --destructive: var(--devnity-error);
+    --destructive-foreground: 255 255 255;
+    
+    --border: rgb(var(--devnity-gray-800));
+    --input: rgb(var(--devnity-gray-800));
+    --ring: rgb(var(--devnity-primary));
+    
+    --chart-1: var(--devnity-primary);
+    --chart-2: var(--devnity-secondary);
+    --chart-3: var(--devnity-accent);
+    --chart-4: var(--devnity-warning);
+    --chart-5: var(--devnity-error);
+    
+    /* Sidebar - Dark */
+    --sidebar-background: rgb(var(--devnity-gray-900));
+    --sidebar-foreground: rgb(var(--devnity-gray-200));
+    --sidebar-primary: var(--devnity-primary);
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: rgb(var(--devnity-gray-800));
+    --sidebar-accent-foreground: rgb(var(--devnity-gray-200));
+    --sidebar-border: rgb(var(--devnity-gray-800));
+    --sidebar-ring: rgb(var(--devnity-primary));
+    --sidebar: rgb(var(--devnity-gray-900));
 }
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
+        border-color: rgb(var(--border));
+        outline-color: rgb(var(--ring)) / 0.5;
     }
     body {
-        @apply bg-background text-foreground;
+        background-color: rgb(var(--background));
+        color: rgb(var(--foreground));
+        font-family: var(--font-sans);
     }
+}
+
+/* Devnity Custom Utility Classes */
+.devnity-gradient {
+    background: linear-gradient(135deg, rgb(var(--devnity-primary)) 0%, rgb(var(--devnity-secondary)) 100%);
+}
+
+.devnity-gradient-hover {
+    background: linear-gradient(135deg, rgb(var(--devnity-primary)) 0%, rgb(var(--devnity-accent)) 100%);
+}
+
+.devnity-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .devnity-glass {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.devnity-card {
+    background: rgb(var(--card));
+    border: 1px solid rgb(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.devnity-card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    transform: translateY(-1px);
+}
+
+.devnity-button-primary {
+    background: rgb(var(--devnity-primary));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+}
+
+.devnity-button-primary:hover {
+    background: rgb(var(--devnity-primary) / 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgb(var(--devnity-primary) / 0.4);
+}
+
+.devnity-text-gradient {
+    background: linear-gradient(135deg, rgb(var(--devnity-primary)), rgb(var(--devnity-secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Animation classes */
+.devnity-animate-in {
+    animation: devnity-slide-in 0.5s ease-out;
+}
+
+@keyframes devnity-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.devnity-animate-pulse {
+    animation: devnity-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes devnity-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgb(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(var(--devnity-primary));
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--devnity-primary) / 0.8);
 }
