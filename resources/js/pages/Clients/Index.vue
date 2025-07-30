@@ -34,8 +34,19 @@ interface Client {
 interface Props {
   clients: {
     data: Client[]
-    links: any[]
-    meta: any
+    links?: {
+      label: string
+      url: string | null
+      active: boolean
+    }[]
+    meta?: {
+      from?: number
+      to?: number
+      total?: number
+      current_page?: number
+      last_page?: number
+      per_page?: number
+    }
   }
   filters: {
     search?: string
@@ -145,32 +156,42 @@ function getTypeColor(type: string) {
 
 <template>
   <AppLayout>
-    <div class="space-y-6">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Clientes
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">
-            Gerencie seus clientes e contatos
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button
-            @click="exportClients"
-            class="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            <Download class="h-4 w-4" />
-            Exportar
-          </button>
-          <Link
-            href="/clients/create"
-            class="devnity-button-primary flex items-center gap-2"
-          >
-            <Plus class="h-4 w-4" />
-            Novo Cliente
-          </Link>
+    <div class="devnity-animate-in space-y-8">
+      <!-- Hero Header -->
+      <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
+        <div class="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-700/25 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
+        <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="space-y-2">
+            <div class="flex items-center gap-3">
+              <div class="p-3 rounded-2xl bg-blue-100 dark:bg-blue-900/20">
+                <Users class="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h1 class="text-4xl font-bold devnity-text-gradient">
+                  Clientes
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 text-lg">
+                  Gerencie sua carteira de clientes de forma inteligente
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              @click="exportClients"
+              class="flex items-center gap-2 px-6 py-3 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 hover:shadow-lg hover:scale-105"
+            >
+              <Download class="h-5 w-5" />
+              Exportar
+            </button>
+            <Link
+              href="/clients/create"
+              class="devnity-button-primary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus class="h-5 w-5" />
+              Novo Cliente
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -413,24 +434,24 @@ function getTypeColor(type: string) {
         </div>
 
         <!-- Pagination -->
-        <div v-if="clients.data.length && clients.links" class="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
+        <div v-if="clients.data.length && clients.links?.length" class="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-700 dark:text-gray-300">
-              Mostrando {{ clients.meta.from }} a {{ clients.meta.to }} de {{ clients.meta.total }} resultados
+              Mostrando {{ clients.meta?.from || 1 }} a {{ clients.meta?.to || clients.data.length }} de {{ clients.meta?.total || clients.data.length }} resultados
             </div>
             <div class="flex items-center gap-1">
               <Link
                 v-for="link in clients.links"
                 :key="link.label"
-                :href="link.url"
+                :href="link.url || '#'"
                 v-html="link.label"
                 :class="[
                   'px-3 py-2 text-sm border rounded transition-colors',
                   link.active
                     ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400'
-                    : 'border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    : 'border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                  !link.url && 'opacity-50 cursor-not-allowed'
                 ]"
-                :disabled="!link.url"
               />
             </div>
           </div>
