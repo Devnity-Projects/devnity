@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useForm, router, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { ArrowLeft, Save, Edit, Search, Loader2 } from 'lucide-vue-next'
@@ -67,6 +67,35 @@ const form = useForm({
 // CEP search functionality
 const searchingCep = ref(false)
 
+// Document formatting functions
+function formatDocument(value: string) {
+  // Remove tudo que não é número
+  const cleanValue = value.replace(/\D/g, '')
+  
+  if (form.type === 'Pessoa Física') {
+    // Formato CPF: 000.000.000-00
+    return cleanValue
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1')
+  } else {
+    // Formato CNPJ: 00.000.000/0000-00
+    return cleanValue
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1')
+  }
+}
+
+function onDocumentInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const formatted = formatDocument(target.value)
+  form.document = formatted
+}
+
 async function searchCep() {
   if (!form.zip_code || form.zip_code.length < 8) return
   
@@ -98,6 +127,13 @@ function submit() {
     },
   })
 }
+
+// Watch for type changes to reformat document
+watch(() => form.type, () => {
+  if (form.document) {
+    form.document = formatDocument(form.document)
+  }
+})
 </script>
 
 <template>
@@ -165,6 +201,7 @@ function submit() {
                 v-model="form.document"
                 type="text"
                 required
+                @input="onDocumentInput"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 :placeholder="form.type === 'Pessoa Física' ? '000.000.000-00' : '00.000.000/0000-00'"
               />
