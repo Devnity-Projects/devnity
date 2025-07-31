@@ -63,13 +63,29 @@ const showNotifications = ref(false)
 
 const handleClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement
-  if (!target.closest('.profile-dropdown')) showProfile.value = false
-  if (!target.closest('.notifications-dropdown')) showNotifications.value = false
-  if (!target.closest('.mobile-menu')) showMobileMenu.value = false
+  
+  // Close dropdowns when clicking outside
+  if (!target.closest('.profile-dropdown')) {
+    showProfile.value = false
+  }
+  if (!target.closest('.notifications-dropdown')) {
+    showNotifications.value = false
+  }
+  if (!target.closest('.mobile-menu-toggle') && !target.closest('.mobile-menu')) {
+    showMobileMenu.value = false
+  }
 }
 
 onMounted(() => {
+  document.documentElement.classList.toggle('dark', isDark.value)
   window.addEventListener('click', handleClickOutside)
+  
+  // Close mobile menu when window resizes to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      showMobileMenu.value = false
+    }
+  })
 })
 </script>
 
@@ -84,9 +100,10 @@ onMounted(() => {
         <div class="flex items-center gap-6">
           <!-- Mobile Menu Button -->
           <button
-            @click="showMobileMenu = !showMobileMenu"
-            class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            @click.stop="showMobileMenu = !showMobileMenu"
+            class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mobile-menu-toggle"
             aria-label="Toggle menu"
+            type="button"
           >
             <Menu v-if="!showMobileMenu" class="h-5 w-5" />
             <X v-else class="h-5 w-5" />
@@ -245,18 +262,17 @@ onMounted(() => {
     </header>
 
     <!-- Mobile Navigation -->
-    <Transition name="slide-down">
-      <nav 
-        v-if="showMobileMenu"
-        class="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-4 mobile-menu"
-      >
+    <div 
+      v-if="showMobileMenu"
+      class="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-4 shadow-lg"
+    >
         <div class="space-y-2">
           <Link
             v-for="item in nav"
             :key="item.href"
             :href="item.href"
             @click="showMobileMenu = false"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors block w-full"
             :class="[
               $page.url.startsWith(item.href)
                 ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300'
@@ -270,8 +286,7 @@ onMounted(() => {
             </div>
           </Link>
         </div>
-      </nav>
-    </Transition>
+      </div>
 
     <!-- Main Content -->
     <main class="container mx-auto max-w-screen-2xl px-4 sm:px-6 py-6">
@@ -329,23 +344,35 @@ onMounted(() => {
 
 .slide-down-enter-active,
 .slide-down-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-out;
+  transform-origin: top;
 }
 
-.slide-down-enter-from,
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scaleY(0.95);
+}
+
 .slide-down-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-10px) scaleY(0.95);
 }
 
 /* Custom scrollbar for mobile menu */
 .mobile-menu {
   scrollbar-width: none;
   -ms-overflow-style: none;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
 }
 
 .mobile-menu::-webkit-scrollbar {
   display: none;
+}
+
+/* Ensure mobile menu appears above other content */
+.mobile-menu {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Glass morphism effect for header */
