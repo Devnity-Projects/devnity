@@ -11,13 +11,9 @@ class CepController extends Controller
     /**
      * Buscar informações de endereço por CEP
      */
-    public function search(Request $request): JsonResponse
+    public function search(string $zipcode): JsonResponse
     {
-        $request->validate([
-            'cep' => 'required|string|size:8'
-        ]);
-
-        $cep = preg_replace('/\D/', '', $request->cep);
+        $cep = preg_replace('/\D/', '', $zipcode);
 
         if (strlen($cep) !== 8) {
             return response()->json([
