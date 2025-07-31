@@ -18,7 +18,7 @@ import {
   Hash
 } from 'lucide-vue-next'
 
-interface Client {
+interface ClientData {
   id: number
   name: string
   type: string
@@ -45,16 +45,26 @@ interface Client {
   created_at: string
 }
 
+interface Client extends ClientData {
+  data?: ClientData
+}
+
 const props = defineProps<{
   client: Client
   recentProjects?: any[]
   projectsCount?: number
 }>()
 
-const isPJ = computed(() => props.client.type === 'Pessoa Jurídica')
+// Safeguard para acessar os dados do client
+const clientData = computed(() => {
+  // Se client tem uma propriedade data, use ela, senão use client diretamente
+  return (props.client as any)?.data || props.client || {}
+})
+
+const isPJ = computed(() => clientData.value.type === 'Pessoa Jurídica')
 
 const statusInfo = computed(() => {
-  if (props.client.status === 'ativo') {
+  if (clientData.value.status === 'ativo') {
     return {
       text: 'Ativo',
       icon: CheckCircle,
@@ -120,10 +130,10 @@ function getProjectStatusText(status: string) {
               </div>
               <div>
                 <h1 class="text-4xl font-bold devnity-text-gradient">
-                  {{ client.name }}
+                  {{ clientData.name }}
                 </h1>
                 <p class="text-gray-600 dark:text-gray-400 text-lg">
-                  {{ client.formatted_document || client.document }}
+                  {{ clientData.formatted_document || clientData.document }}
                 </p>
               </div>
             </div>
@@ -153,7 +163,7 @@ function getProjectStatusText(status: string) {
               Voltar
             </Link>
             <Link
-              :href="`/clients/${client.id}/edit`"
+              :href="`/clients/${clientData.id}/edit`"
               class="devnity-button-primary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Edit class="h-5 w-5" />
@@ -177,23 +187,23 @@ function getProjectStatusText(status: string) {
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
-                  <div v-if="client.email" class="flex items-start gap-3">
+                  <div v-if="clientData.email" class="flex items-start gap-3">
                     <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                       <Mail class="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">E-mail</div>
-                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.email }}</div>
+                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.email }}</div>
                     </div>
                   </div>
 
-                  <div v-if="client.phone" class="flex items-start gap-3">
+                  <div v-if="clientData.phone" class="flex items-start gap-3">
                     <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                       <Phone class="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">Telefone</div>
-                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.formatted_phone || client.phone }}</div>
+                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.formatted_phone || clientData.phone }}</div>
                     </div>
                   </div>
 
@@ -204,40 +214,40 @@ function getProjectStatusText(status: string) {
                     <div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">Cadastro</div>
                       <div class="font-medium text-gray-900 dark:text-gray-100">
-                        {{ new Date(client.created_at).toLocaleDateString('pt-BR') }}
+                        {{ new Date(clientData.created_at).toLocaleDateString('pt-BR') }}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div class="space-y-4">
-                  <div v-if="client.responsible" class="flex items-start gap-3">
+                  <div v-if="clientData.responsible" class="flex items-start gap-3">
                     <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                       <User class="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">Responsável</div>
-                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.responsible }}</div>
+                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.responsible }}</div>
                     </div>
                   </div>
 
-                  <div v-if="client.responsible_email" class="flex items-start gap-3">
+                  <div v-if="clientData.responsible_email" class="flex items-start gap-3">
                     <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                       <Mail class="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">E-mail do Responsável</div>
-                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.responsible_email }}</div>
+                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.responsible_email }}</div>
                     </div>
                   </div>
 
-                  <div v-if="client.responsible_phone" class="flex items-start gap-3">
+                  <div v-if="clientData.responsible_phone" class="flex items-start gap-3">
                     <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                       <Phone class="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">Telefone do Responsável</div>
-                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.responsible_phone }}</div>
+                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.responsible_phone }}</div>
                     </div>
                   </div>
                 </div>
@@ -246,7 +256,7 @@ function getProjectStatusText(status: string) {
           </div>
 
           <!-- Address -->
-          <div v-if="client.address || client.city || client.state || client.zip_code" class="devnity-card">
+          <div v-if="clientData.address || clientData.city || clientData.state || clientData.zip_code" class="devnity-card">
             <div class="p-6">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                 <MapPin class="h-5 w-5 text-green-500" />
@@ -254,33 +264,33 @@ function getProjectStatusText(status: string) {
               </h3>
               
               <div class="space-y-3">
-                <div v-if="client.address" class="flex flex-wrap gap-2 text-sm">
-                  <span class="font-medium text-gray-900 dark:text-gray-100">{{ client.address }}</span>
-                  <span v-if="client.number" class="text-gray-600 dark:text-gray-400">, {{ client.number }}</span>
-                  <span v-if="client.complement" class="text-gray-600 dark:text-gray-400">- {{ client.complement }}</span>
+                <div v-if="clientData.address" class="flex flex-wrap gap-2 text-sm">
+                  <span class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.address }}</span>
+                  <span v-if="clientData.number" class="text-gray-600 dark:text-gray-400">, {{ clientData.number }}</span>
+                  <span v-if="clientData.complement" class="text-gray-600 dark:text-gray-400">- {{ clientData.complement }}</span>
                 </div>
                 
-                <div v-if="client.neighborhood || client.city || client.state" class="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span v-if="client.neighborhood">{{ client.neighborhood }}</span>
-                  <span v-if="client.neighborhood && (client.city || client.state)">•</span>
-                  <span v-if="client.city">{{ client.city }}</span>
-                  <span v-if="client.city && client.state">-</span>
-                  <span v-if="client.state">{{ client.state }}</span>
+                <div v-if="clientData.neighborhood || clientData.city || clientData.state" class="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <span v-if="clientData.neighborhood">{{ clientData.neighborhood }}</span>
+                  <span v-if="clientData.neighborhood && (clientData.city || clientData.state)">•</span>
+                  <span v-if="clientData.city">{{ clientData.city }}</span>
+                  <span v-if="clientData.city && clientData.state">-</span>
+                  <span v-if="clientData.state">{{ clientData.state }}</span>
                 </div>
                 
-                <div v-if="client.zip_code" class="text-sm text-gray-600 dark:text-gray-400">
-                  CEP: {{ client.zip_code }}
+                <div v-if="clientData.zip_code" class="text-sm text-gray-600 dark:text-gray-400">
+                  CEP: {{ clientData.zip_code }}
                 </div>
                 
-                <div v-if="client.country" class="text-sm text-gray-600 dark:text-gray-400">
-                  {{ client.country }}
+                <div v-if="clientData.country" class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ clientData.country }}
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Notes -->
-          <div v-if="client.notes" class="devnity-card">
+          <div v-if="clientData.notes" class="devnity-card">
             <div class="p-6">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                 <FileText class="h-5 w-5 text-purple-500" />
@@ -288,7 +298,7 @@ function getProjectStatusText(status: string) {
               </h3>
               
               <div class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
-                {{ client.notes }}
+                {{ clientData.notes }}
               </div>
             </div>
           </div>
@@ -297,7 +307,7 @@ function getProjectStatusText(status: string) {
         <!-- Sidebar -->
         <div class="space-y-6">
           <!-- Registration Info (for PJ) -->
-          <div v-if="isPJ && (client.state_registration || client.municipal_registration)" class="devnity-card">
+          <div v-if="isPJ && (clientData.state_registration || clientData.municipal_registration)" class="devnity-card">
             <div class="p-6">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <Building class="h-5 w-5 text-orange-500" />
@@ -305,14 +315,14 @@ function getProjectStatusText(status: string) {
               </h3>
               
               <div class="space-y-4">
-                <div v-if="client.state_registration">
+                <div v-if="clientData.state_registration">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Inscrição Estadual</div>
-                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.state_registration }}</div>
+                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.state_registration }}</div>
                 </div>
                 
-                <div v-if="client.municipal_registration">
+                <div v-if="clientData.municipal_registration">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Inscrição Municipal</div>
-                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ client.municipal_registration }}</div>
+                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ clientData.municipal_registration }}</div>
                 </div>
               </div>
             </div>
@@ -371,7 +381,7 @@ function getProjectStatusText(status: string) {
               
               <div class="space-y-3">
                 <Link
-                  :href="`/clients/${client.id}/edit`"
+                  :href="`/clients/${clientData.id}/edit`"
                   class="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
                   <Edit class="h-4 w-4" />

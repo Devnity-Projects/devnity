@@ -6,38 +6,40 @@ use App\Http\Requests\ClientRequest;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 class ClientController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): InertiaResponse
     {
         $query = Client::query();
 
-        // Aplicar filtros
+        // Search filter
         if ($request->filled('search')) {
             $query->search($request->search);
         }
 
+        // Status filter
         if ($request->filled('status')) {
-            $query->byStatus($request->status);
+            $query->where('status', $request->status);
         }
 
+        // Type filter
         if ($request->filled('type')) {
             $query->byType($request->type);
         }
 
-        // Ordenação
+        // Sorting
         $sortBy = $request->get('sort_by', 'name');
         $sortDirection = $request->get('sort_direction', 'asc');
         
-        $allowedSorts = ['name', 'email', 'created_at', 'status', 'type'];
-        if (in_array($sortBy, $allowedSorts)) {
+        $validSortColumns = ['name', 'email', 'type', 'status', 'created_at'];
+        if (in_array($sortBy, $validSortColumns)) {
             $query->orderBy($sortBy, $sortDirection);
-        } else {
-            $query->orderBy('name', 'asc');
         }
 
         $clients = $query->paginate($request->get('per_page', 15))
@@ -62,30 +64,20 @@ class ClientController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(): InertiaResponse
     {
-        return Inertia::render('Clients/Create', [
-            'types' => [
-                Client::TYPE_INDIVIDUAL,
-                Client::TYPE_LEGAL,
-            ],
-            'statuses' => [
-                Client::STATUS_ACTIVE,
-                Client::STATUS_INACTIVE,
-            ]
-        ]);
+        return Inertia::render('Clients/Create');
     }
 
     public function store(ClientRequest $request): RedirectResponse
     {
         $client = Client::create($request->validated());
 
-        return redirect()
-            ->route('clients.show', $client)
-            ->with('success', 'Cliente cadastrado com sucesso!');
+        return Redirect::route('clients.show', $client)
+            ->with('success', 'Cliente criado com sucesso!');
     }
 
-    public function show(Client $client): Response
+    public function show(Client $client): InertiaResponse
     {
         $client->load(['projects' => function($query) {
             $query->orderBy('created_at', 'desc')->limit(5);
@@ -98,18 +90,10 @@ class ClientController extends Controller
         ]);
     }
 
-    public function edit(Client $client): Response
+    public function edit(Client $client): InertiaResponse
     {
         return Inertia::render('Clients/Edit', [
             'client' => new ClientResource($client),
-            'types' => [
-                Client::TYPE_INDIVIDUAL,
-                Client::TYPE_LEGAL,
-            ],
-            'statuses' => [
-                Client::STATUS_ACTIVE,
-                Client::STATUS_INACTIVE,
-            ]
         ]);
     }
 
@@ -117,36 +101,70 @@ class ClientController extends Controller
     {
         $client->update($request->validated());
 
-        return redirect()
-            ->route('clients.show', $client)
+        return Redirect::route('clients.show', $client)
             ->with('success', 'Cliente atualizado com sucesso!');
     }
 
     public function destroy(Client $client): RedirectResponse
     {
-        try {
-            $client->delete();
-            
-            return redirect()
-                ->route('clients.index')
-                ->with('success', 'Cliente removido com sucesso!');
-        } catch (\Exception $e) {
-            return redirect()
-                ->route('clients.index')
-                ->with('error', 'Não foi possível remover o cliente. Verifique se não há dependências.');
-        }
+        $client->delete();
+
+        return Redirect::route('clients.index')
+            ->with('success', 'Cliente excluído com sucesso!');
     }
 
-    public function export(Request $request)
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:clients,id'
+        ]);
+
+        Client::whereIn('id', $request->ids)->delete();
+
+        return Redirect::route('clients.index')
+            ->with('success', count($request->ids) . ' cliente(s) excluído(s) com sucesso!');
+    }
+
+    public function bulkToggleStatus(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:clients,id',
+            'status' => 'required|in:ativo,inativo'
+        ]);
+
+        Client::whereIn('id', $request->ids)
+            ->update(['status' => $request->status]);
+
+        $statusText = $request->status === 'ativo' ? 'ativados' : 'desativados';
+        
+        return Redirect::route('clients.index')
+            ->with('success', count($request->ids) . ' cliente(s) ' . $statusText . ' com sucesso!');
+    }
+
+    public function toggleStatus(Client $client): RedirectResponse
+    {
+        $newStatus = $client->status === 'ativo' ? 'inativo' : 'ativo';
+        $client->update(['status' => $newStatus]);
+
+        $statusText = $newStatus === 'ativo' ? 'ativado' : 'desativado';
+
+        return Redirect::back()
+            ->with('success', "Cliente {$statusText} com sucesso!");
+    }
+
+    public function export(Request $request): Response
     {
         $query = Client::query();
 
+        // Apply same filters as index
         if ($request->filled('search')) {
             $query->search($request->search);
         }
 
         if ($request->filled('status')) {
-            $query->byStatus($request->status);
+            $query->where('status', $request->status);
         }
 
         if ($request->filled('type')) {
@@ -155,117 +173,62 @@ class ClientController extends Controller
 
         $clients = $query->orderBy('name')->get();
 
-        $csv = [];
-        $csv[] = [
-            'Nome',
-            'Tipo',
-            'Documento',
-            'Email',
-            'Telefone',
-            'Responsável',
-            'Status',
-            'Cidade',
-            'Estado',
-            'Data de Cadastro'
-        ];
-
+        $csv = "Nome,Tipo,Documento,Email,Telefone,Status,Endereço,Cidade,Estado,CEP,Criado em\n";
+        
         foreach ($clients as $client) {
-            $csv[] = [
+            $csv .= sprintf(
+                '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
                 $client->name,
                 $client->type,
-                $client->formatted_document,
-                $client->email,
-                $client->formatted_phone,
-                $client->responsible,
+                $client->formatted_document ?: $client->document,
+                $client->email ?: '',
+                $client->formatted_phone ?: $client->phone ?: '',
                 ucfirst($client->status),
-                $client->city,
-                $client->state,
-                $client->created_at->format('d/m/Y')
-            ];
+                $client->address ?: '',
+                $client->city ?: '',
+                $client->state ?: '',
+                $client->formatted_zip_code ?: $client->zip_code ?: '',
+                $client->created_at?->format('d/m/Y H:i') ?: ''
+            );
         }
 
-        $filename = 'clientes_' . date('Y-m-d_H-i-s') . '.csv';
-        
-        $handle = fopen('php://output', 'w');
-        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-        
-        foreach ($csv as $row) {
-            fputcsv($handle, $row, ';');
-        }
-        
-        fclose($handle);
-
-        return response()->stream(function() use ($csv) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-            
-            foreach ($csv as $row) {
-                fputcsv($handle, $row, ';');
-            }
-            
-            fclose($handle);
-        }, 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="clientes_' . date('Y-m-d_H-i-s') . '.csv"');
     }
 
-    public function toggleStatus(Client $client): RedirectResponse
-    {
-        $newStatus = $client->status === Client::STATUS_ACTIVE 
-            ? Client::STATUS_INACTIVE 
-            : Client::STATUS_ACTIVE;
-            
-        $client->update(['status' => $newStatus]);
-
-        $statusText = $newStatus === Client::STATUS_ACTIVE ? 'ativado' : 'desativado';
-        
-        return redirect()
-            ->back()
-            ->with('success', "Cliente {$statusText} com sucesso!");
-    }
-
-    public function bulkDestroy(Request $request): RedirectResponse
+    public function bulkExport(Request $request): Response
     {
         $request->validate([
-            'clients' => 'required|array',
-            'clients.*' => 'exists:clients,id'
+            'ids' => 'required|array',
+            'ids.*' => 'exists:clients,id'
         ]);
 
-        try {
-            $count = Client::whereIn('id', $request->clients)->delete();
-            
-            return redirect()
-                ->route('clients.index')
-                ->with('success', "{$count} cliente(s) removido(s) com sucesso!");
-        } catch (\Exception $e) {
-            return redirect()
-                ->route('clients.index')
-                ->with('error', 'Erro ao remover clientes. Verifique se não há dependências.');
-        }
-    }
+        $clients = Client::whereIn('id', $request->ids)
+            ->orderBy('name')
+            ->get();
 
-    public function bulkToggleStatus(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'clients' => 'required|array',
-            'clients.*' => 'exists:clients,id',
-            'status' => 'required|in:' . Client::STATUS_ACTIVE . ',' . Client::STATUS_INACTIVE
-        ]);
-
-        try {
-            $count = Client::whereIn('id', $request->clients)
-                ->update(['status' => $request->status]);
-            
-            $statusText = $request->status === Client::STATUS_ACTIVE ? 'ativados' : 'desativados';
-            
-            return redirect()
-                ->route('clients.index')
-                ->with('success', "{$count} cliente(s) {$statusText} com sucesso!");
-        } catch (\Exception $e) {
-            return redirect()
-                ->route('clients.index')
-                ->with('error', 'Erro ao atualizar status dos clientes.');
+        $csv = "Nome,Tipo,Documento,Email,Telefone,Status,Endereço,Cidade,Estado,CEP,Criado em\n";
+        
+        foreach ($clients as $client) {
+            $csv .= sprintf(
+                '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
+                $client->name,
+                $client->type,
+                $client->formatted_document ?: $client->document,
+                $client->email ?: '',
+                $client->formatted_phone ?: $client->phone ?: '',
+                ucfirst($client->status),
+                $client->address ?: '',
+                $client->city ?: '',
+                $client->state ?: '',
+                $client->formatted_zip_code ?: $client->zip_code ?: '',
+                $client->created_at?->format('d/m/Y H:i') ?: ''
+            );
         }
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="clientes_selecionados_' . date('Y-m-d_H-i-s') . '.csv"');
     }
 }
