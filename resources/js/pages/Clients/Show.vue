@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
+import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { 
   ArrowLeft, 
   Edit, 
@@ -62,6 +63,7 @@ const clientData = computed(() => {
 })
 
 const isPJ = computed(() => clientData.value.type === 'Pessoa Jurídica')
+const showDeleteModal = ref(false)
 
 const statusInfo = computed(() => {
   if (clientData.value.status === 'ativo') {
@@ -92,6 +94,19 @@ const typeInfo = computed(() => {
     class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
   }
 })
+
+function deleteClient() {
+  showDeleteModal.value = true
+}
+
+function confirmDelete() {
+  router.delete(route('clients.destroy', clientData.value.id), {
+    onSuccess: () => {
+      router.visit(route('clients.index'))
+    },
+  })
+  showDeleteModal.value = false
+}
 
 function getProjectStatusColor(status: string) {
   const colors: Record<string, string> = {
@@ -389,6 +404,7 @@ function getProjectStatusText(status: string) {
                 </Link>
                 
                 <button
+                  @click="deleteClient"
                   class="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
                   <Trash2 class="h-4 w-4" />
@@ -400,5 +416,18 @@ function getProjectStatusText(status: string) {
         </div>
       </div>
     </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <ConfirmationModal
+      :show="showDeleteModal"
+      title="Excluir Cliente"
+      :message="`Tem certeza que deseja excluir o cliente '${clientData.name}'? Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.`"
+      confirm-text="Sim, Excluir"
+      cancel-text="Cancelar"
+      type="danger"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+      @close="showDeleteModal = false"
+    />
   </AppLayout>
 </template>

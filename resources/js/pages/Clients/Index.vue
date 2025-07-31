@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import BulkActions from '@/components/Clients/BulkActions.vue'
+import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { 
   Plus, 
   Search, 
@@ -12,7 +13,6 @@ import {
   Building, 
   TrendingUp, 
   Calendar,
-  MoreHorizontal,
   Eye,
   Edit,
   Trash2
@@ -73,6 +73,8 @@ const type = ref(props.filters.type || '')
 const sortBy = ref(props.filters.sort_by || 'name')
 const sortDirection = ref(props.filters.sort_direction || 'asc')
 const selectedClients = ref<number[]>([])
+const showDeleteModal = ref(false)
+const clientToDelete = ref<Client | null>(null)
 
 // Computed for select all functionality
 const isAllSelected = computed(() => 
@@ -183,6 +185,23 @@ function toggleClientSelection(clientId: number) {
 
 function clearSelection() {
   selectedClients.value = []
+}
+
+function deleteClient(client: Client) {
+  clientToDelete.value = client
+  showDeleteModal.value = true
+}
+
+function confirmDelete() {
+  if (clientToDelete.value) {
+    router.delete(route('clients.destroy', clientToDelete.value.id), {
+      preserveScroll: true,
+      onFinish: () => {
+        showDeleteModal.value = false
+        clientToDelete.value = null
+      }
+    })
+  }
 }
 </script>
 
@@ -458,10 +477,11 @@ function clearSelection() {
                       <Edit class="h-4 w-4" />
                     </Link>
                     <button
+                      @click="deleteClient(client)"
                       class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                      title="Mais opções"
+                      title="Excluir"
                     >
-                      <MoreHorizontal class="h-4 w-4" />
+                      <Trash2 class="h-4 w-4" />
                     </button>
                   </div>
                 </td>
@@ -513,5 +533,18 @@ function clearSelection() {
         </div>
       </div>
     </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <ConfirmationModal
+      :show="showDeleteModal"
+      title="Excluir Cliente"
+      :message="clientToDelete ? `Tem certeza que deseja excluir o cliente '${clientToDelete.name}'? Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.` : ''"
+      confirm-text="Sim, Excluir"
+      cancel-text="Cancelar"
+      type="danger"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false; clientToDelete = null"
+      @close="showDeleteModal = false; clientToDelete = null"
+    />
   </AppLayout>
 </template>
