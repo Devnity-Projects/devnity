@@ -221,4 +221,10 @@ class Client extends Model
 
         return $cnpj[12] == $digit1 && $cnpj[13] == $digit2;
     }
+
+    // Relacionamentos
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }

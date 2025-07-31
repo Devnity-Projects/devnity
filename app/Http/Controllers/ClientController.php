@@ -87,8 +87,14 @@ class ClientController extends Controller
 
     public function show(Client $client): Response
     {
+        $client->load(['projects' => function($query) {
+            $query->orderBy('created_at', 'desc')->limit(5);
+        }]);
+
         return Inertia::render('Clients/Show', [
             'client' => new ClientResource($client),
+            'recentProjects' => $client->projects,
+            'projectsCount' => $client->projects()->count(),
         ]);
     }
 
@@ -217,5 +223,49 @@ class ClientController extends Controller
         return redirect()
             ->back()
             ->with('success', "Cliente {$statusText} com sucesso!");
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'clients' => 'required|array',
+            'clients.*' => 'exists:clients,id'
+        ]);
+
+        try {
+            $count = Client::whereIn('id', $request->clients)->delete();
+            
+            return redirect()
+                ->route('clients.index')
+                ->with('success', "{$count} cliente(s) removido(s) com sucesso!");
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('clients.index')
+                ->with('error', 'Erro ao remover clientes. Verifique se não há dependências.');
+        }
+    }
+
+    public function bulkToggleStatus(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'clients' => 'required|array',
+            'clients.*' => 'exists:clients,id',
+            'status' => 'required|in:' . Client::STATUS_ACTIVE . ',' . Client::STATUS_INACTIVE
+        ]);
+
+        try {
+            $count = Client::whereIn('id', $request->clients)
+                ->update(['status' => $request->status]);
+            
+            $statusText = $request->status === Client::STATUS_ACTIVE ? 'ativados' : 'desativados';
+            
+            return redirect()
+                ->route('clients.index')
+                ->with('success', "{$count} cliente(s) {$statusText} com sucesso!");
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('clients.index')
+                ->with('error', 'Erro ao atualizar status dos clientes.');
+        }
     }
 }

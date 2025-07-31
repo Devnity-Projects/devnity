@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CepController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
@@ -15,7 +16,12 @@ Route::middleware('auth')->group(function () {
     // Rotas de clientes
     Route::resource('clients', ClientController::class);
     Route::post('clients/{client}/toggle-status', [ClientController::class, 'toggleStatus'])->name('clients.toggle-status');
+    Route::delete('clients/bulk-destroy', [ClientController::class, 'bulkDestroy'])->name('clients.bulk-destroy');
+    Route::patch('clients/bulk-toggle-status', [ClientController::class, 'bulkToggleStatus'])->name('clients.bulk-toggle-status');
     Route::get('clients-export', [ClientController::class, 'export'])->name('clients.export');
+    
+    // Rota para consulta de CEP
+    Route::get('cep/{cep}', [CepController::class, 'search'])->name('cep.search');
     
     // Rotas de projetos
     Route::resource('projects', ProjectController::class);

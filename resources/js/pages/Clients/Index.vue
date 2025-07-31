@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import BulkActions from '@/components/Clients/BulkActions.vue'
 import { 
   Plus, 
   Search, 
@@ -71,6 +72,16 @@ const status = ref(props.filters.status || '')
 const type = ref(props.filters.type || '')
 const sortBy = ref(props.filters.sort_by || 'name')
 const sortDirection = ref(props.filters.sort_direction || 'asc')
+const selectedClients = ref<number[]>([])
+
+// Computed for select all functionality
+const isAllSelected = computed(() => 
+  props.clients.data.length > 0 && selectedClients.value.length === props.clients.data.length
+)
+
+const isIndeterminate = computed(() => 
+  selectedClients.value.length > 0 && selectedClients.value.length < props.clients.data.length
+)
 
 // Quick stats
 const quickStats = computed(() => [
@@ -151,6 +162,27 @@ function getTypeColor(type: string) {
   return type === 'Pessoa Física'
     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
     : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+}
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedClients.value = []
+  } else {
+    selectedClients.value = props.clients.data.map(client => client.id)
+  }
+}
+
+function toggleClientSelection(clientId: number) {
+  const index = selectedClients.value.indexOf(clientId)
+  if (index > -1) {
+    selectedClients.value.splice(index, 1)
+  } else {
+    selectedClients.value.push(clientId)
+  }
+}
+
+function clearSelection() {
+  selectedClients.value = []
 }
 </script>
 
@@ -277,12 +309,27 @@ function getTypeColor(type: string) {
         </div>
       </div>
 
+      <!-- Bulk Actions -->
+      <BulkActions 
+        :selected-clients="selectedClients" 
+        @clear-selection="clearSelection"
+      />
+
       <!-- Clients Table -->
       <div class="devnity-card overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-800/50">
               <tr>
+                <th class="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    :checked="isAllSelected"
+                    :indeterminate="isIndeterminate"
+                    @change="toggleSelectAll"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </th>
                 <th
                   @click="toggleSort('name')"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -336,6 +383,14 @@ function getTypeColor(type: string) {
                 :key="client.id"
                 class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
               >
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    :checked="selectedClients.includes(client.id)"
+                    @change="toggleClientSelection(client.id)"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">

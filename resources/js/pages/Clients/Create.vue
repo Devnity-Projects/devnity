@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { ArrowLeft, Plus, UserPlus } from 'lucide-vue-next'
 
 // Components
-import BasicInfoSection from '@/components/Clients/BasicInfoSection.vue'
+import BasicInfoSectionEnhanced from '@/components/Clients/BasicInfoSectionEnhanced.vue'
 import ContactInfoSection from '@/components/Clients/ContactInfoSection.vue'
 import ResponsibleInfoSection from '@/components/Clients/ResponsibleInfoSection.vue'
 import RegistrationSection from '@/components/Clients/RegistrationSection.vue'
@@ -81,7 +81,7 @@ function submit() {
       <div class="devnity-card max-w-4xl mx-auto">
         <form @submit.prevent="submit" class="space-y-8">
           <!-- Basic Information -->
-          <BasicInfoSection :form="form" />
+          <BasicInfoSectionEnhanced :form="form" />
 
           <!-- Contact Information -->
           <ContactInfoSection :form="form" />
