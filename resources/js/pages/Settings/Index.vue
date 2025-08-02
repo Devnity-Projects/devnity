@@ -4,31 +4,31 @@ import { useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 interface Settings {
-  theme: string
-  notifications: {
-    email: boolean
-    push: boolean
-    marketing: boolean
+  theme?: string
+  notifications?: {
+    email?: boolean
+    push?: boolean
+    marketing?: boolean
   }
-  language: string
-  timezone: string
+  language?: string
+  timezone?: string
 }
 
 interface Props {
-  settings: Settings
+  settings?: Settings
 }
 
 const props = defineProps<Props>()
 
 const form = useForm({
-  theme: props.settings.theme,
+  theme: props.settings?.theme || 'system',
   notifications: {
-    email: props.settings.notifications.email,
-    push: props.settings.notifications.push,
-    marketing: props.settings.notifications.marketing
+    email: props.settings?.notifications?.email || true,
+    push: props.settings?.notifications?.push || true,
+    marketing: props.settings?.notifications?.marketing || false
   },
-  language: props.settings.language,
-  timezone: props.settings.timezone
+  language: props.settings?.language || 'pt-BR',
+  timezone: props.settings?.timezone || 'America/Sao_Paulo'
 })
 
 const updateSettings = () => {
