@@ -1,336 +1,303 @@
-<template>
-  <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <div class="md:flex md:items-center md:justify-between">
-      <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-          Configurações
-        </h2>
-      </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="mt-6">
-      <div class="sm:hidden">
-        <label for="tabs" class="sr-only">Selecione uma aba</label>
-        <select
-          id="tabs"
-          name="tabs"
-          class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          @change="handleTabChange"
-        >
-          <option value="general">Geral</option>
-          <option value="profile">Perfil</option>
-          <option value="password">Senha</option>
-        </select>
-      </div>
-      <div class="hidden sm:block">
-        <div class="border-b border-gray-200">
-          <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-            <button
-              @click="activeTab = 'general'"
-              :class="[
-                'whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm',
-                activeTab === 'general'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              ]"
-            >
-              Geral
-            </button>
-            <a
-              :href="route('settings.profile.edit')"
-              :class="[
-                'whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm',
-                $page.component === 'Settings/Profile'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              ]"
-            >
-              Perfil
-            </a>
-            <a
-              :href="route('settings.password.edit')"
-              :class="[
-                'whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm',
-                $page.component === 'Settings/Password'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              ]"
-            >
-              Senha
-            </a>
-          </nav>
-        </div>
-      </div>
-    </div>
-
-    <!-- General Settings Content -->
-    <div v-if="activeTab === 'general'" class="mt-6">
-      <div class="bg-white shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Preferências Gerais
-          </h3>
-          <div class="mt-2 max-w-xl text-sm text-gray-500">
-            <p>Configure suas preferências de tema, idioma e notificações.</p>
-          </div>
-          
-          <form @submit.prevent="updateSettings" class="mt-5">
-            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-              <!-- Theme -->
-              <div class="sm:col-span-3">
-                <label for="theme" class="block text-sm font-medium text-gray-700">
-                  Tema
-                </label>
-                <select
-                  id="theme"
-                  v-model="form.theme"
-                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                >
-                  <option value="light">Claro</option>
-                  <option value="dark">Escuro</option>
-                </select>
-              </div>
-
-              <!-- Language -->
-              <div class="sm:col-span-3">
-                <label for="language" class="block text-sm font-medium text-gray-700">
-                  Idioma
-                </label>
-                <select
-                  id="language"
-                  v-model="form.language"
-                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                >
-                  <option value="pt-BR">Português (Brasil)</option>
-                  <option value="en-US">English (US)</option>
-                </select>
-              </div>
-
-              <!-- Timezone -->
-              <div class="sm:col-span-3">
-                <label for="timezone" class="block text-sm font-medium text-gray-700">
-                  Fuso Horário
-                </label>
-                <select
-                  id="timezone"
-                  v-model="form.timezone"
-                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                >
-                  <option value="America/Sao_Paulo">São Paulo (GMT-3)</option>
-                  <option value="America/New_York">New York (GMT-5)</option>
-                  <option value="Europe/London">London (GMT+0)</option>
-                  <option value="Europe/Paris">Paris (GMT+1)</option>
-                </select>
-              </div>
-
-              <!-- Date Format -->
-              <div class="sm:col-span-3">
-                <label for="date_format" class="block text-sm font-medium text-gray-700">
-                  Formato de Data
-                </label>
-                <select
-                  id="date_format"
-                  v-model="form.date_format"
-                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                >
-                  <option value="d/m/Y">DD/MM/AAAA</option>
-                  <option value="m/d/Y">MM/DD/AAAA</option>
-                  <option value="Y-m-d">AAAA-MM-DD</option>
-                </select>
-              </div>
-
-              <!-- Time Format -->
-              <div class="sm:col-span-3">
-                <label for="time_format" class="block text-sm font-medium text-gray-700">
-                  Formato de Hora
-                </label>
-                <select
-                  id="time_format"
-                  v-model="form.time_format"
-                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                >
-                  <option value="H:i">24 horas (HH:MM)</option>
-                  <option value="g:i A">12 horas (H:MM AM/PM)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Notifications -->
-            <div class="mt-6">
-              <fieldset>
-                <legend class="text-base font-medium text-gray-900">Notificações</legend>
-                <div class="mt-4 space-y-4">
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input
-                        id="email_notifications"
-                        v-model="form.email_notifications"
-                        type="checkbox"
-                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      >
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="email_notifications" class="font-medium text-gray-700">
-                        Notificações por Email
-                      </label>
-                      <p class="text-gray-500">Receba notificações importantes por email.</p>
-                    </div>
-                  </div>
-                  
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input
-                        id="browser_notifications"
-                        v-model="form.browser_notifications"
-                        type="checkbox"
-                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      >
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="browser_notifications" class="font-medium text-gray-700">
-                        Notificações do Navegador
-                      </label>
-                      <p class="text-gray-500">Receba notificações push no navegador.</p>
-                    </div>
-                  </div>
-                  
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input
-                        id="task_reminders"
-                        v-model="form.task_reminders"
-                        type="checkbox"
-                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      >
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="task_reminders" class="font-medium text-gray-700">
-                        Lembretes de Tarefas
-                      </label>
-                      <p class="text-gray-500">Receba lembretes sobre tarefas próximas ao vencimento.</p>
-                    </div>
-                  </div>
-                  
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input
-                        id="project_updates"
-                        v-model="form.project_updates"
-                        type="checkbox"
-                        class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      >
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="project_updates" class="font-medium text-gray-700">
-                        Atualizações de Projetos
-                      </label>
-                      <p class="text-gray-500">Receba notificações sobre mudanças nos projetos.</p>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-            </div>
-
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="resetToDefaults"
-                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Restaurar Padrões
-              </button>
-              <button
-                type="submit"
-                :disabled="form.processing"
-                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                <svg v-if="form.processing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Salvar Configurações
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import { router } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
 
-interface UserSettings {
+interface Settings {
   theme: string
+  notifications: {
+    email: boolean
+    push: boolean
+    marketing: boolean
+  }
   language: string
-  email_notifications: boolean
-  browser_notifications: boolean
-  task_reminders: boolean
-  project_updates: boolean
   timezone: string
-  date_format: string
-  time_format: string
 }
 
 interface Props {
-  settings: UserSettings
+  settings: Settings
 }
 
 const props = defineProps<Props>()
 
-const activeTab = ref('general')
-
 const form = useForm({
   theme: props.settings.theme,
+  notifications: {
+    email: props.settings.notifications.email,
+    push: props.settings.notifications.push,
+    marketing: props.settings.notifications.marketing
+  },
   language: props.settings.language,
-  email_notifications: props.settings.email_notifications,
-  browser_notifications: props.settings.browser_notifications,
-  task_reminders: props.settings.task_reminders,
-  project_updates: props.settings.project_updates,
-  timezone: props.settings.timezone,
-  date_format: props.settings.date_format,
-  time_format: props.settings.time_format
+  timezone: props.settings.timezone
 })
 
-const handleTabChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const value = target.value
-  
-  if (value === 'profile') {
-    router.visit(route('settings.profile.edit'))
-  } else if (value === 'password') {
-    router.visit(route('settings.password.edit'))
-  } else {
-    activeTab.value = value
-  }
-}
-
 const updateSettings = () => {
-  form.patch(route('settings.update'), {
-    onSuccess: () => {
-      // Settings updated successfully
-    }
-  })
-}
-
-const resetToDefaults = () => {
-  router.post(route('settings.reset'), {}, {
-    onSuccess: () => {
-      // Reload the form with default values
-      form.theme = 'light'
-      form.language = 'pt-BR'
-      form.email_notifications = true
-      form.browser_notifications = true
-      form.task_reminders = true
-      form.project_updates = true
-      form.timezone = 'America/Sao_Paulo'
-      form.date_format = 'd/m/Y'
-      form.time_format = 'H:i'
-    }
-  })
+  form.post(route('settings.update'))
 }
 </script>
+
+<template>
+  <AppLayout>
+    <div class="space-y-8">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Configurações
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">
+            Gerencie suas preferências e configurações da conta
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Navigation -->
+        <div class="lg:w-1/4">
+          <nav class="space-y-1">
+            <a
+              :href="route('settings.index')"
+              class="bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 group flex items-center px-3 py-2 text-sm font-medium rounded-lg"
+            >
+              <svg class="text-blue-500 dark:text-blue-300 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Geral
+            </a>
+            <a
+              :href="route('settings.profile.edit')"
+              class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+            >
+              <svg class="text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Perfil
+            </a>
+            <a
+              :href="route('settings.password.edit')"
+              class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+            >
+              <svg class="text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Senha
+            </a>
+          </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="lg:w-3/4 space-y-6">
+          <!-- Appearance Settings -->
+          <div class="bg-white dark:bg-gray-900 shadow-sm rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Aparência</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Configure o tema e aparência da interface
+                  </p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Tema
+                  </label>
+                  <div class="grid grid-cols-3 gap-3">
+                    <label class="cursor-pointer">
+                      <input 
+                        v-model="form.theme" 
+                        type="radio" 
+                        value="light" 
+                        class="sr-only peer"
+                      >
+                      <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                          <div class="bg-white border border-gray-300 rounded w-8 h-6 shadow-sm"></div>
+                          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Claro</span>
+                        </div>
+                      </div>
+                    </label>
+                    
+                    <label class="cursor-pointer">
+                      <input 
+                        v-model="form.theme" 
+                        type="radio" 
+                        value="dark" 
+                        class="sr-only peer"
+                      >
+                      <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                          <div class="bg-gray-800 border border-gray-600 rounded w-8 h-6 shadow-sm"></div>
+                          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Escuro</span>
+                        </div>
+                      </div>
+                    </label>
+                    
+                    <label class="cursor-pointer">
+                      <input 
+                        v-model="form.theme" 
+                        type="radio" 
+                        value="system" 
+                        class="sr-only peer"
+                      >
+                      <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                          <div class="relative w-8 h-6 rounded shadow-sm overflow-hidden">
+                            <div class="absolute inset-0 w-1/2 bg-white border-r border-gray-300"></div>
+                            <div class="absolute inset-0 left-1/2 bg-gray-800"></div>
+                          </div>
+                          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Sistema</span>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification Settings -->
+          <div class="bg-white dark:bg-gray-900 shadow-sm rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Notificações</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Configure como e quando receber notificações
+                  </p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Notificações por email
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Receba atualizações importantes por email
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      v-model="form.notifications.email" 
+                      type="checkbox" 
+                      class="sr-only peer"
+                    >
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Notificações push
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Receba notificações instantâneas no navegador
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      v-model="form.notifications.push" 
+                      type="checkbox" 
+                      class="sr-only peer"
+                    >
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Marketing e promoções
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Receba ofertas especiais e novidades
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      v-model="form.notifications.marketing" 
+                      type="checkbox" 
+                      class="sr-only peer"
+                    >
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Regional Settings -->
+          <div class="bg-white dark:bg-gray-900 shadow-sm rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Configurações Regionais</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Configure idioma e fuso horário
+                  </p>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Idioma
+                  </label>
+                  <select
+                    id="language"
+                    v-model="form.language"
+                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                  >
+                    <option value="pt-BR">Português (Brasil)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="es-ES">Español</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="timezone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Fuso Horário
+                  </label>
+                  <select
+                    id="timezone"
+                    v-model="form.timezone"
+                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                  >
+                    <option value="America/Sao_Paulo">São Paulo (GMT-3)</option>
+                    <option value="America/New_York">New York (GMT-5)</option>
+                    <option value="Europe/London">London (GMT+0)</option>
+                    <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="flex justify-end">
+            <button
+              @click="updateSettings"
+              :disabled="form.processing"
+              class="px-6 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center"
+            >
+              <svg v-if="form.processing" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <svg v-else class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Salvar configurações
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>

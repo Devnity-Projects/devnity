@@ -68,6 +68,23 @@ class ProfileController extends Controller
     }
 
     /**
+     * Remove the user's avatar.
+     */
+    public function removeAvatar(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        // Delete avatar if exists
+        if ($user->avatar && file_exists(storage_path('app/public/avatars/' . $user->avatar))) {
+            unlink(storage_path('app/public/avatars/' . $user->avatar));
+        }
+
+        $user->update(['avatar' => null]);
+
+        return back()->with('status', 'Avatar removido com sucesso!');
+    }
+
+    /**
      * Delete the user's profile.
      */
     public function destroy(Request $request): RedirectResponse
