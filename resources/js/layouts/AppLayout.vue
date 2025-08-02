@@ -228,7 +228,7 @@ onMounted(() => {
                 </div>
                 
                 <Link 
-                  href="/profile" 
+                  href="/settings/profile" 
                   class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <User class="h-4 w-4" />

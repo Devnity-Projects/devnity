@@ -5,6 +5,9 @@ use App\Http\Controllers\CepController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\Settings\SettingsController;
+use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\PasswordController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -33,4 +36,19 @@ Route::middleware('auth')->group(function () {
     Route::resource('tasks', TaskController::class);
     Route::patch('tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.update-status');
     Route::get('tasks-kanban', [TaskController::class, 'kanban'])->name('tasks.kanban');
+    
+    // Settings Routes
+    Route::prefix('settings')->name('settings.')->middleware('ensure.user.settings')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::patch('/', [SettingsController::class, 'update'])->name('update');
+        Route::post('/reset', [SettingsController::class, 'reset'])->name('reset');
+        
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
+        
+        Route::get('/password', [PasswordController::class, 'edit'])->name('password.edit');
+        Route::patch('/password', [PasswordController::class, 'update'])->name('password.update');
+    });
 });

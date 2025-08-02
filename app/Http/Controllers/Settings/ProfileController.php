@@ -18,9 +18,21 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/Profile', [
+        $user = $request->user();
+        $user->load('settings');
+        
+        return Inertia::render('Settings/Profile', [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'bio' => $user->bio,
+                'avatar_url' => $user->avatar_url,
+                'email_verified_at' => $user->email_verified_at,
+            ],
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
+            'status' => session('status'),
         ]);
     }
 
@@ -29,15 +41,30 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && file_exists(storage_path('app/public/avatars/' . $user->avatar))) {
+                unlink(storage_path('app/public/avatars/' . $user->avatar));
+            }
+            
+            $avatarName = time() . '_' . $user->id . '.' . $request->file('avatar')->getClientOriginalExtension();
+            $request->file('avatar')->storeAs('public/avatars', $avatarName);
+            $validated['avatar'] = $avatarName;
         }
 
-        $request->user()->save();
+        $user->fill($validated);
 
-        return to_route('profile.edit');
+        if ($user->isDirty('email')) {
+            $user->forceFill(['email_verified_at' => null]);
+        }
+
+        $user->save();
+
+        return back()->with('status', 'Perfil atualizado com sucesso!');
     }
 
     /**
@@ -50,6 +77,11 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        // Delete avatar if exists
+        if ($user->avatar && file_exists(storage_path('app/public/avatars/' . $user->avatar))) {
+            unlink(storage_path('app/public/avatars/' . $user->avatar));
+        }
 
         Auth::logout();
 
