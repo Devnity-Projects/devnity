@@ -174,10 +174,14 @@ class TaskController extends Controller
     {
         $task->load([
             'project.client',
-            'assignedUser'
+            'assignedUser',
+            'comments.user',
+            'attachments.user',
+            'checklist.assignedTo',
+            'activities.user'
         ]);
 
-        return Inertia::render('Tasks/Show', [
+        return Inertia::render('Tasks/ShowAdvanced', [
             'task' => $task,
         ]);
     }

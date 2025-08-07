@@ -24,7 +24,7 @@ class TaskCommentController extends Controller
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => 'comment_added',
+            'action' => 'comment_added',
             'description' => $comment->is_internal ? 'Adicionou um comentário interno' : 'Adicionou um comentário',
         ]);
 
@@ -43,7 +43,7 @@ class TaskCommentController extends Controller
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => 'comment_deleted',
+            'action' => 'comment_deleted',
             'description' => 'Removeu um comentário',
         ]);
 

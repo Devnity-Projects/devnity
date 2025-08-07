@@ -206,7 +206,7 @@ function confirmDelete() {
           <div class="mt-4 flex md:ml-4 md:mt-0 space-x-3">
             <Link
               :href="route('projects.create')"
-              class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
+              class="devnity-button-primary flex items-center gap-2"
             >
               <Plus class="h-4 w-4" />
               Novo Projeto
@@ -434,7 +434,7 @@ function confirmDelete() {
             <Link
               v-if="!hasActiveFilters"
               :href="route('projects.create')"
-              class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
+              class="devnity-button-primary flex items-center gap-2"
             >
               <Plus class="h-4 w-4" />
               Novo Projeto
@@ -442,7 +442,7 @@ function confirmDelete() {
             <button
               v-else
               @click="clearFilters"
-              class="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              class="devnity-button-secondary flex items-center gap-2"
             >
               <RotateCcw class="h-4 w-4" />
               Limpar Filtros

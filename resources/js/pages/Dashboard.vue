@@ -188,7 +188,7 @@ onMounted(() => {
               </Link>
               <Link 
                 href="/projects/create"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                class="devnity-button-secondary flex items-center gap-2"
               >
                 <FolderKanban class="h-4 w-4" />
                 Novo Projeto

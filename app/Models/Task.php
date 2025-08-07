@@ -70,8 +70,6 @@ class Task extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    // Temporarily commented out to avoid autoloading issues
-    /*
     public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\TaskComment::class);
@@ -91,7 +89,6 @@ class Task extends Model
     {
         return $this->hasMany(\App\Models\TaskActivity::class);
     }
-    */
 
     // Scopes
     public function scopeByStatus(Builder $query, string $status): Builder

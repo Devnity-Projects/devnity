@@ -56,6 +56,7 @@ interface TaskAttachment {
   filename: string
   original_name: string
   size: number
+  path: string
   mime_type: string
   user: User
   created_at: string
@@ -64,9 +65,11 @@ interface TaskAttachment {
 interface TaskChecklist {
   id: number
   title: string
+  description?: string | null
   is_completed: boolean
-  completed_at: string | null
-  completed_by: User | null
+  assigned_to?: number | null
+  assignedTo?: User | null
+  due_date?: string | null
   order: number
   created_at: string
 }
@@ -681,8 +684,8 @@ const deleteComment = (comment: TaskComment) => {
                       <p :class="['text-sm', item.is_completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white']">
                         {{ item.title }}
                       </p>
-                      <p v-if="item.completed_at" class="text-xs text-gray-500 dark:text-gray-400">
-                        Concluído por {{ item.completed_by?.name }} em {{ formatDate(item.completed_at) }}
+                      <p v-if="item.assignedTo" class="text-xs text-gray-500 dark:text-gray-400">
+                        Atribuído para {{ item.assignedTo.name }}
                       </p>
                     </div>
                     

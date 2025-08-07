@@ -24,7 +24,7 @@ class TaskChecklistController extends Controller
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => 'checklist_item_added',
+            'action' => 'checklist_item_added',
             'description' => "Adicionou item da checklist: {$item->title}",
         ]);
 
@@ -39,21 +39,12 @@ class TaskChecklistController extends Controller
 
         $wasCompleted = $checklist->is_completed;
         $checklist->is_completed = $request->boolean('is_completed');
-        
-        if ($checklist->is_completed && !$wasCompleted) {
-            $checklist->completed_at = now();
-            $checklist->completed_by_id = auth()->id();
-        } elseif (!$checklist->is_completed && $wasCompleted) {
-            $checklist->completed_at = null;
-            $checklist->completed_by_id = null;
-        }
-
         $checklist->save();
 
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => $checklist->is_completed ? 'checklist_item_completed' : 'checklist_item_unchecked',
+            'action' => $checklist->is_completed ? 'checklist_item_completed' : 'checklist_item_unchecked',
             'description' => ($checklist->is_completed ? 'Marcou como concluído' : 'Desmarcou') . " o item: {$checklist->title}",
         ]);
 
@@ -68,7 +59,7 @@ class TaskChecklistController extends Controller
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => 'checklist_item_removed',
+            'action' => 'checklist_item_removed',
             'description' => "Removeu item da checklist: {$title}",
         ]);
 

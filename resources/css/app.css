@@ -276,6 +276,39 @@
     box-shadow: 0 4px 12px rgb(var(--devnity-primary) / 0.4);
 }
 
+.devnity-button-secondary {
+    background: rgb(var(--devnity-gray-100));
+    color: rgb(var(--devnity-gray-900)) !important;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid rgb(var(--devnity-gray-300));
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.devnity-button-secondary * {
+    color: inherit !important;
+}
+
+.dark .devnity-button-secondary {
+    background: rgb(var(--devnity-gray-800));
+    color: rgb(var(--devnity-gray-100)) !important;
+    border-color: rgb(var(--devnity-gray-700));
+}
+
+.devnity-button-secondary:hover {
+    background: rgb(var(--devnity-gray-200));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgb(var(--devnity-gray-400) / 0.3);
+}
+
+.dark .devnity-button-secondary:hover {
+    background: rgb(var(--devnity-gray-700));
+    box-shadow: 0 4px 12px rgb(var(--devnity-gray-900) / 0.5);
+}
+
 .devnity-text-gradient {
     background: linear-gradient(135deg, rgb(var(--devnity-primary)), rgb(var(--devnity-secondary)));
     -webkit-background-clip: text;

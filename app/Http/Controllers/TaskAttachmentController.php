@@ -32,7 +32,7 @@ class TaskAttachmentController extends Controller
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => 'attachment_added',
+            'action' => 'attachment_added',
             'description' => "Adicionou o arquivo: {$attachment->original_name}",
         ]);
 
@@ -68,7 +68,7 @@ class TaskAttachmentController extends Controller
         // Log activity
         $task->activities()->create([
             'user_id' => auth()->id(),
-            'type' => 'attachment_removed',
+            'action' => 'attachment_removed',
             'description' => "Removeu o arquivo: {$attachment->original_name}",
         ]);
 
