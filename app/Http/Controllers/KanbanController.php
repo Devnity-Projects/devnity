@@ -24,11 +24,23 @@ class KanbanController extends Controller
         $query = Task::with(['project', 'assignedUser'])
             ->when($projectId, fn($q) => $q->byProject($projectId))
             ->when($assignedTo, function($q) use ($assignedTo) {
-                if ($assignedTo === 'unassigned') {
-                    return $q->whereNull('assigned_to');
-                } else {
-                    return $q->assignedTo($assignedTo);
+                // Handle multiple assigned_to values separated by comma
+                $assignedToValues = is_string($assignedTo) ? explode(',', $assignedTo) : [$assignedTo];
+                $assignedToValues = array_filter($assignedToValues); // Remove empty values
+                
+                if (empty($assignedToValues)) {
+                    return $q;
                 }
+                
+                return $q->where(function($query) use ($assignedToValues) {
+                    foreach ($assignedToValues as $value) {
+                        if (trim($value) === 'unassigned') {
+                            $query->orWhereNull('assigned_to');
+                        } else {
+                            $query->orWhere('assigned_to', trim($value));
+                        }
+                    }
+                });
             })
             ->when($search, fn($q) => $q->search($search))
             ->when($priority, fn($q) => $q->where('priority', $priority))

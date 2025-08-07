@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import KanbanColumn from '@/components/Tasks/KanbanColumn.vue'
@@ -83,12 +83,13 @@ const props = defineProps<Props>()
 // Reactive filters
 const search = ref(props.filters.search || '')
 const projectId = ref(props.filters.project_id || '')
-const assignedTo = ref(props.filters.assigned_to || '')
+const assignedTo = ref<string[]>(props.filters.assigned_to ? [props.filters.assigned_to] : [])
 const priority = ref(props.filters.priority || '')
 const type = ref(props.filters.type || '')
 const overdue = ref(props.filters.overdue || false)
 const showFilters = ref(false)
 const showQuickCreate = ref(false)
+const showAssignedToDropdown = ref(false)
 
 // Notification system
 const notification = ref({
@@ -108,7 +109,7 @@ watch(() => props.columns, (newColumns) => {
 
 // Computed
 const hasActiveFilters = computed(() => 
-  search.value || projectId.value || assignedTo.value || priority.value || type.value || overdue.value
+  search.value || projectId.value || assignedTo.value.length > 0 || priority.value || type.value || overdue.value
 )
 
 const columnKeys = computed(() => Object.keys(props.columns))
@@ -120,13 +121,16 @@ const activeFiltersDisplay = computed(() => {
     const project = props.projects.find(p => p.id.toString() === projectId.value)
     filters.push(`Projeto: ${project?.name}`)
   }
-  if (assignedTo.value) {
-    if (assignedTo.value === 'unassigned') {
-      filters.push('Responsável: Sem atribuição')
-    } else {
-      const user = props.users.find(u => u.id.toString() === assignedTo.value)
-      filters.push(`Responsável: ${user?.name}`)
-    }
+  if (assignedTo.value.length > 0) {
+    const responsibles = assignedTo.value.map(id => {
+      if (id === 'unassigned') {
+        return 'Sem atribuição'
+      } else {
+        const user = props.users.find(u => u.id.toString() === id)
+        return user?.name || 'Usuário desconhecido'
+      }
+    })
+    filters.push(`Responsável: ${responsibles.join(', ')}`)
   }
   if (priority.value) {
     filters.push(`Prioridade: ${props.priorities[priority.value]}`)
@@ -140,10 +144,18 @@ const activeFiltersDisplay = computed(() => {
 
 // Methods
 function applyFilters() {
+  // Se houver múltiplos valores, enviar como array; se apenas um, enviar como string
+  let assignedToParam = ''
+  if (assignedTo.value.length === 1) {
+    assignedToParam = assignedTo.value[0]
+  } else if (assignedTo.value.length > 1) {
+    assignedToParam = assignedTo.value.join(',')
+  }
+
   router.get(route('kanban.index'), {
     search: search.value,
     project_id: projectId.value,
-    assigned_to: assignedTo.value,
+    assigned_to: assignedToParam,
     priority: priority.value,
     type: type.value,
     overdue: overdue.value ? '1' : '',
@@ -156,12 +168,38 @@ function applyFilters() {
 function clearFilters() {
   search.value = ''
   projectId.value = ''
-  assignedTo.value = ''
+  assignedTo.value = []
   priority.value = ''
   type.value = ''
   overdue.value = false
   applyFilters()
 }
+
+// Toggle function for multi-select assigned to
+function toggleAssignedTo(value: string) {
+  const index = assignedTo.value.indexOf(value)
+  if (index > -1) {
+    assignedTo.value.splice(index, 1)
+  } else {
+    assignedTo.value.push(value)
+  }
+  applyFilters()
+}
+
+// Close dropdown when clicking outside
+function handleClickOutside(event: Event) {
+  if (showAssignedToDropdown.value && !(event.target as Element).closest('.assigned-to-dropdown')) {
+    showAssignedToDropdown.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 function handleTaskMove(taskId: number, newStatus: string, newOrder: number) {
   // Optimistic update - update the task in the UI immediately
@@ -349,17 +387,69 @@ watch([projectId, assignedTo, priority, type, overdue], () => {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsável</label>
-              <select 
-                v-model="assignedTo"
-                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm transition-colors"
-              >
-                <option value="">👥 Todos os usuários</option>
-                <option value="unassigned">❌ Sem atribuição</option>
-                <option v-for="user in users" :key="user.id" :value="user.id.toString()">
-                  👤 {{ user.name }}
-                </option>
-              </select>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Responsável
+                <span v-if="assignedTo.length > 0" class="ml-1 text-xs text-blue-600 dark:text-blue-400">
+                  ({{ assignedTo.length }} selecionado{{ assignedTo.length > 1 ? 's' : '' }})
+                </span>
+              </label>
+              <div class="relative assigned-to-dropdown">
+                <button
+                  type="button"
+                  @click="showAssignedToDropdown = !showAssignedToDropdown"
+                  class="flex items-center justify-between w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm transition-colors"
+                >
+                  <span class="truncate">
+                    {{ assignedTo.length === 0 ? '👥 Todos os usuários' : `${assignedTo.length} selecionado${assignedTo.length > 1 ? 's' : ''}` }}
+                  </span>
+                  <svg class="w-4 h-4 ml-2 transition-transform" :class="{ 'rotate-180': showAssignedToDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                
+                <!-- Dropdown -->
+                <div
+                  v-if="showAssignedToDropdown"
+                  class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
+                >
+                  <!-- Clear all option -->
+                  <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                    <button
+                      type="button"
+                      @click="assignedTo = []; applyFilters()"
+                      class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      🗑️ Limpar seleção
+                    </button>
+                  </div>
+                  
+                  <!-- Unassigned option -->
+                  <label class="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked="assignedTo.includes('unassigned')"
+                      @change="toggleAssignedTo('unassigned')"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+                    />
+                    <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">❌ Sem atribuição</span>
+                  </label>
+                  
+                  <!-- Users options -->
+                  <label
+                    v-for="user in users"
+                    :key="user.id"
+                    class="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="assignedTo.includes(user.id.toString())"
+                      @change="toggleAssignedTo(user.id.toString())"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+                    />
+                    <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">👤 {{ user.name }}</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div>
