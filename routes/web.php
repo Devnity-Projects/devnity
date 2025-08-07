@@ -9,6 +9,9 @@ use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskAttachmentController;
 use App\Http\Controllers\TaskChecklistController;
+use App\Http\Controllers\SupportTicketController;
+use App\Http\Controllers\SupportCategoryController;
+use App\Http\Controllers\SupportResponseController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -64,6 +67,25 @@ Route::middleware('auth')->group(function () {
     Route::post('kanban/reorder', [KanbanController::class, 'reorder'])->name('kanban.reorder');
     Route::post('kanban/quick-create', [KanbanController::class, 'quickCreate'])->name('kanban.quick-create');
     
+    // Rotas do Sistema de Suporte
+    Route::prefix('support')->name('support.')->group(function () {
+        // Gerenciamento de tickets (admin)
+        Route::get('admin', [SupportTicketController::class, 'admin'])->name('admin');
+        Route::get('tickets', [SupportTicketController::class, 'index'])->name('tickets.index');
+        Route::get('tickets/create', [SupportTicketController::class, 'create'])->name('tickets.create');
+        Route::post('tickets', [SupportTicketController::class, 'store'])->name('tickets.store');
+        Route::get('tickets/{ticket}', [SupportTicketController::class, 'show'])->name('tickets.show');
+        Route::patch('tickets/{ticket}', [SupportTicketController::class, 'update'])->name('tickets.update');
+        Route::delete('tickets/{ticket}', [SupportTicketController::class, 'destroy'])->name('tickets.destroy');
+        
+        // Respostas de tickets
+        Route::post('tickets/{ticket}/responses', [SupportResponseController::class, 'store'])->name('tickets.responses.store');
+        Route::delete('tickets/{ticket}/responses/{response}', [SupportResponseController::class, 'destroy'])->name('tickets.responses.destroy');
+        
+        // Categorias de suporte
+        Route::resource('categories', SupportCategoryController::class)->except(['show']);
+    });
+
     // Settings Routes
     Route::prefix('settings')->name('settings.')->middleware('ensure.user.settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
