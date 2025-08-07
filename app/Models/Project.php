@@ -57,6 +57,12 @@ class Project extends Model
     public const PRIORITY_HIGH = 'high';
     public const PRIORITY_URGENT = 'urgent';
 
+    // Constantes para tipo
+    public const TYPE_DEVELOPMENT = 'development';
+    public const TYPE_MAINTENANCE = 'maintenance';
+    public const TYPE_SUPPORT = 'support';
+    public const TYPE_CONSULTATION = 'consultation';
+
     // Relacionamentos
     public function client(): BelongsTo
     {
@@ -134,6 +140,17 @@ class Project extends Model
             self::PRIORITY_HIGH => 'Alta',
             self::PRIORITY_URGENT => 'Urgente',
             default => 'Média'
+        };
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return match($this->type) {
+            self::TYPE_DEVELOPMENT => 'Desenvolvimento',
+            self::TYPE_MAINTENANCE => 'Manutenção',
+            self::TYPE_SUPPORT => 'Suporte',
+            self::TYPE_CONSULTATION => 'Consultoria',
+            default => 'Desenvolvimento'
         };
     }
 

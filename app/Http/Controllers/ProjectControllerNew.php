@@ -221,25 +221,4 @@ class ProjectController extends Controller
 
         return back()->with('success', 'Status do projeto atualizado com sucesso!');
     }
-
-    public function bulkUpdateStatus(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:projects,id',
-            'status' => 'required|in:' . implode(',', [
-                Project::STATUS_PLANNING,
-                Project::STATUS_IN_PROGRESS,
-                Project::STATUS_ON_HOLD,
-                Project::STATUS_COMPLETED,
-                Project::STATUS_CANCELLED,
-            ]),
-        ]);
-
-        Project::whereIn('id', $request->ids)
-            ->update(['status' => $request->status]);
-
-        return Redirect::route('projects.index')
-            ->with('success', 'Status dos projetos atualizado com sucesso!');
-    }
 }

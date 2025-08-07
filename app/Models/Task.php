@@ -70,6 +70,29 @@ class Task extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    // Temporarily commented out to avoid autoloading issues
+    /*
+    public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\TaskComment::class);
+    }
+
+    public function attachments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\TaskAttachment::class);
+    }
+
+    public function checklist(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\TaskChecklist::class);
+    }
+
+    public function activities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\TaskActivity::class);
+    }
+    */
+
     // Scopes
     public function scopeByStatus(Builder $query, string $status): Builder
     {
@@ -162,8 +185,9 @@ class Task extends Model
     {
         if (!$this->hours_worked || $this->hours_worked == 0) return '0h';
         
-        $hours = floor($this->hours_worked);
-        $minutes = ($this->hours_worked - $hours) * 60;
+        $hoursWorked = (float) $this->hours_worked;
+        $hours = floor($hoursWorked);
+        $minutes = ($hoursWorked - $hours) * 60;
         
         if ($hours > 0 && $minutes > 0) {
             return "{$hours}h {$minutes}m";

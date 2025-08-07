@@ -31,7 +31,11 @@ class TaskController extends Controller
         }
 
         if ($request->has('assigned_to') && $request->assigned_to) {
-            $query->where('assigned_to', $request->assigned_to);
+            if ($request->assigned_to === 'unassigned') {
+                $query->whereNull('assigned_to');
+            } else {
+                $query->where('assigned_to', $request->assigned_to);
+            }
         }
 
         if ($request->has('search') && $request->search) {
@@ -51,10 +55,23 @@ class TaskController extends Controller
         $projects = Project::with('client')->orderBy('name')->get();
         $users = User::orderBy('name')->get();
 
+        // Estatísticas das tarefas
+        $stats = [
+            'total' => Task::count(),
+            'todo' => Task::where('status', Task::STATUS_TODO)->count(),
+            'in_progress' => Task::where('status', Task::STATUS_IN_PROGRESS)->count(),
+            'review' => Task::where('status', Task::STATUS_REVIEW)->count(),
+            'completed' => Task::where('status', Task::STATUS_COMPLETED)->count(),
+            'overdue' => Task::where('due_date', '<', now())
+                          ->whereNotIn('status', [Task::STATUS_COMPLETED, Task::STATUS_CANCELLED])
+                          ->count(),
+        ];
+
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks,
             'projects' => $projects,
             'users' => $users,
+            'stats' => $stats,
             'filters' => $request->only(['status', 'priority', 'project_id', 'assigned_to', 'search', 'order_by', 'direction', 'overdue']),
             'statuses' => [
                 Task::STATUS_TODO => 'A Fazer',
@@ -155,7 +172,10 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $task->load(['project.client', 'assignedUser']);
+        $task->load([
+            'project.client',
+            'assignedUser'
+        ]);
 
         return Inertia::render('Tasks/Show', [
             'task' => $task,
@@ -281,7 +301,11 @@ class TaskController extends Controller
         }
 
         if ($request->has('assigned_to') && $request->assigned_to) {
-            $query->where('assigned_to', $request->assigned_to);
+            if ($request->assigned_to === 'unassigned') {
+                $query->whereNull('assigned_to');
+            } else {
+                $query->where('assigned_to', $request->assigned_to);
+            }
         }
 
         $tasks = $query->get()->groupBy('status');

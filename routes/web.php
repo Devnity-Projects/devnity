@@ -5,6 +5,10 @@ use App\Http\Controllers\CepController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\TaskCommentController;
+use App\Http\Controllers\TaskAttachmentController;
+use App\Http\Controllers\TaskChecklistController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\PasswordController;
@@ -31,11 +35,33 @@ Route::middleware('auth')->group(function () {
     
     // Rotas de projetos
     Route::resource('projects', ProjectController::class);
+    Route::delete('projects/bulk-destroy', [ProjectController::class, 'bulkDestroy'])->name('projects.bulk-destroy');
+    Route::patch('projects/bulk-update-status', [ProjectController::class, 'bulkUpdateStatus'])->name('projects.bulk-update-status');
+    Route::patch('projects/{project}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
     
     // Rotas de tarefas
     Route::resource('tasks', TaskController::class);
     Route::patch('tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.update-status');
     Route::get('tasks-kanban', [TaskController::class, 'kanban'])->name('tasks.kanban');
+    
+    // Rotas de recursos avançados das tarefas
+    Route::post('tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+    Route::delete('tasks/{task}/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('tasks.comments.destroy');
+    
+    Route::post('tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
+    Route::get('tasks/{task}/attachments/{attachment}/download', [TaskAttachmentController::class, 'download'])->name('tasks.attachments.download');
+    Route::delete('tasks/{task}/attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('tasks.attachments.destroy');
+    
+    Route::post('tasks/{task}/checklist', [TaskChecklistController::class, 'store'])->name('tasks.checklist.store');
+    Route::patch('tasks/{task}/checklist/{checklist}', [TaskChecklistController::class, 'update'])->name('tasks.checklist.update');
+    Route::delete('tasks/{task}/checklist/{checklist}', [TaskChecklistController::class, 'destroy'])->name('tasks.checklist.destroy');
+    
+    // Rotas do Kanban
+    Route::get('kanban', [KanbanController::class, 'index'])->name('kanban.index');
+    Route::patch('kanban/{task}/status', [KanbanController::class, 'updateStatus'])->name('kanban.update-status');
+    Route::patch('kanban/{task}/move', [KanbanController::class, 'moveTask'])->name('kanban.move-task');
+    Route::post('kanban/reorder', [KanbanController::class, 'reorder'])->name('kanban.reorder');
+    Route::post('kanban/quick-create', [KanbanController::class, 'quickCreate'])->name('kanban.quick-create');
     
     // Settings Routes
     Route::prefix('settings')->name('settings.')->middleware('ensure.user.settings')->group(function () {

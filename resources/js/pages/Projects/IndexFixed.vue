@@ -34,6 +34,8 @@ interface Project {
   budget: number | null
   hours_estimated: number | null
   hours_worked: number | null
+  start_date: string | null
+  end_date: string | null
   deadline: string | null
   created_at: string
   status_label: string
