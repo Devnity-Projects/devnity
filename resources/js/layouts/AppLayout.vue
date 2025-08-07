@@ -23,6 +23,7 @@ import {
 } from 'lucide-vue-next'
 
 import FlashToasts from '@/components/ui/toast/FlashToasts.vue'
+import GlobalSearch from '@/components/GlobalSearch.vue'
 
 const user = usePage().props.auth?.user
 
@@ -31,6 +32,13 @@ const isDark = ref(
   localStorage.theme === 'dark' ||
   (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
 )
+
+// Global search
+const globalSearch = ref()
+
+const openSearch = () => {
+  globalSearch.value?.open()
+}
 
 const toggleDark = () => {
   isDark.value = !isDark.value
@@ -154,10 +162,22 @@ onMounted(() => {
         <!-- Right side actions -->
         <div class="flex items-center gap-2">
           <!-- Search -->
-          <button class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+          <button 
+            @click="openSearch"
+            class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
             <Search class="h-4 w-4" />
             <span class="hidden lg:inline">Buscar...</span>
             <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 border border-gray-200 dark:border-gray-600 rounded text-xs">⌘K</kbd>
+          </button>
+
+          <!-- Mobile Search -->
+          <button 
+            @click="openSearch"
+            class="sm:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Buscar"
+          >
+            <Search class="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
 
           <!-- Notifications -->
@@ -295,6 +315,9 @@ onMounted(() => {
         <slot />
       </div>
     </main>
+
+    <!-- Global Search Modal -->
+    <GlobalSearch ref="globalSearch" />
 
     <!-- Footer -->
     <footer class="border-t bg-gray-50 dark:bg-gray-900/50 py-8 mt-auto">

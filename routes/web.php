@@ -9,6 +9,7 @@ use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskAttachmentController;
 use App\Http\Controllers\TaskChecklistController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\PasswordController;
@@ -77,4 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/password', [PasswordController::class, 'edit'])->name('password.edit');
         Route::patch('/password', [PasswordController::class, 'update'])->name('password.update');
     });
+
+    // API Routes
+    Route::get('/api/search', [SearchController::class, 'index'])->name('api.search');
 });
