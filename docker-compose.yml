@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devnity_app
+    restart: unless-stopped
+    ports:
+      # Expõe a aplicação na porta 8000
+      - "8002:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      # Conecta à sua rede principal já existente
+      - rede_geral_existente
+    env_file:
+      - .env
+
+networks:
+  rede_geral_existente:
+    external: true
+    # Garanta que este é o nome exato da sua rede externa
+    name: rede_dados_geral
