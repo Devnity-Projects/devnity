@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useForm, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
-import AuthLayout from '@/Layouts/AuthLayout.vue'
+import AuthLayout from '@/layouts/AuthLayout.vue'
 
 const form = useForm({
   name: '',

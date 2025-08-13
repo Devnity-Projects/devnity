@@ -1,10 +1,11 @@
-<?php
+<?php 
 
 namespace Database\Seeders;
 
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,15 +14,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Criar usuário admin
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@devnity.com',
+            'password' => Hash::make('admin123'),
+            'email_verified_at' => now(),
+            'avatar' => null,
+            'phone' => '+55 11 99999-9999',
+            'bio' => 'Administrador do sistema Devnity',
         ]);
 
-        $this->call([
-            ClientSeeder::class,
-        ]);
     }
 }

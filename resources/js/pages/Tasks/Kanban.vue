@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import KanbanColumn from '@/components/Tasks/KanbanColumn.vue'
 import KanbanStats from '@/components/Tasks/KanbanStats.vue'
 import TaskQuickCreate from '@/components/Tasks/TaskQuickCreate.vue'
