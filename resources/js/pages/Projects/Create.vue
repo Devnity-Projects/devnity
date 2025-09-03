@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { 
   Save, 
   X, 
@@ -92,25 +92,28 @@ function goBack() {
 
 <template>
   <AppLayout title="Criar Projeto">
-    <div class="max-w-4xl mx-auto">
-      <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center gap-3 mb-2">
-          <FolderKanban class="h-8 w-8 text-blue-600 dark:text-blue-400" />
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Criar Novo Projeto
-          </h1>
+    <div class="max-w-4xl mx-auto space-y-6">
+      <!-- Header Simples -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <FolderKanban class="h-6 w-6 text-gray-600" />
+          <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Novo Projeto</h1>
         </div>
-        <p class="text-gray-600 dark:text-gray-400">
-          Preencha as informações para criar um novo projeto
-        </p>
+        <button
+          @click="goBack"
+          type="button"
+          class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+        >
+          <X class="h-4 w-4" />
+          Voltar
+        </button>
       </div>
 
       <!-- Formulário -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <form @submit.prevent="submitForm" class="p-6 space-y-6">
-          <!-- Informações Básicas -->
-          <div class="grid md:grid-cols-2 gap-6">
+      <form @submit.prevent="submitForm" class="space-y-6">
+        <!-- Informações Básicas -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nome do Projeto *
@@ -118,10 +121,7 @@ function goBack() {
               <input
                 v-model="form.name"
                 type="text"
-                :class="[
-                  'devnity-input',
-                  errors.name ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Digite o nome do projeto"
                 required
               />
@@ -136,10 +136,7 @@ function goBack() {
               </label>
               <select
                 v-model="form.client_id"
-                :class="[
-                  'devnity-input',
-                  errors.client_id ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option value="">Selecione um cliente</option>
@@ -154,16 +151,13 @@ function goBack() {
           </div>
 
           <!-- Descrição -->
-          <div>
+          <div class="mt-6">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Descrição
             </label>
             <textarea
               v-model="form.description"
-              :class="[
-                'devnity-input',
-                errors.description ? 'border-red-300 dark:border-red-600' : ''
-              ]"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows="3"
               placeholder="Descreva os objetivos e escopo do projeto"
             />
@@ -173,17 +167,14 @@ function goBack() {
           </div>
 
           <!-- Status, Prioridade e Tipo -->
-          <div class="grid md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Status *
               </label>
               <select
                 v-model="form.status"
-                :class="[
-                  'devnity-input',
-                  errors.status ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option v-for="(label, value) in props.statuses" :key="value" :value="value">
@@ -201,10 +192,7 @@ function goBack() {
               </label>
               <select
                 v-model="form.priority"
-                :class="[
-                  'devnity-input',
-                  errors.priority ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option v-for="(label, value) in props.priorities" :key="value" :value="value">
@@ -222,10 +210,7 @@ function goBack() {
               </label>
               <select
                 v-model="form.type"
-                :class="[
-                  'devnity-input',
-                  errors.type ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option v-for="(label, value) in props.types" :key="value" :value="value">
@@ -237,12 +222,14 @@ function goBack() {
               </p>
             </div>
           </div>
+        </div>
 
-          <!-- Orçamento e Horas -->
-          <div class="grid md:grid-cols-2 gap-6">
+        <!-- Detalhes Financeiros -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Detalhes Financeiros</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <DollarSign class="inline h-4 w-4 mr-1" />
                 Orçamento (R$)
               </label>
               <input
@@ -250,10 +237,7 @@ function goBack() {
                 type="number"
                 step="0.01"
                 min="0"
-                :class="[
-                  'devnity-input',
-                  errors.budget ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="0,00"
               />
               <p v-if="errors.budget" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -263,7 +247,6 @@ function goBack() {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <Clock class="inline h-4 w-4 mr-1" />
                 Horas Estimadas
               </label>
               <input
@@ -271,10 +254,7 @@ function goBack() {
                 type="number"
                 step="0.5"
                 min="0"
-                :class="[
-                  'devnity-input',
-                  errors.hours_estimated ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="0"
               />
               <p v-if="errors.hours_estimated" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -282,21 +262,20 @@ function goBack() {
               </p>
             </div>
           </div>
+        </div>
 
-          <!-- Datas -->
-          <div class="grid md:grid-cols-3 gap-6">
+        <!-- Cronograma -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Cronograma</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <Calendar class="inline h-4 w-4 mr-1" />
                 Data de Início
               </label>
               <input
                 v-model="form.start_date"
                 type="date"
-                :class="[
-                  'devnity-input',
-                  errors.start_date ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p v-if="errors.start_date" class="mt-1 text-sm text-red-600 dark:text-red-400">
                 {{ errors.start_date }}
@@ -310,10 +289,7 @@ function goBack() {
               <input
                 v-model="form.end_date"
                 type="date"
-                :class="[
-                  'devnity-input',
-                  errors.end_date ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p v-if="errors.end_date" class="mt-1 text-sm text-red-600 dark:text-red-400">
                 {{ errors.end_date }}
@@ -322,25 +298,26 @@ function goBack() {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <AlertTriangle class="inline h-4 w-4 mr-1" />
                 Prazo Final
               </label>
               <input
                 v-model="form.deadline"
                 type="date"
-                :class="[
-                  'devnity-input',
-                  errors.deadline ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p v-if="errors.deadline" class="mt-1 text-sm text-red-600 dark:text-red-400">
                 {{ errors.deadline }}
               </p>
             </div>
           </div>
+        </div>
 
+        <!-- Tecnologias e URLs -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Tecnologias e URLs</h3>
+          
           <!-- Tecnologias -->
-          <div>
+          <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Tecnologias
             </label>
@@ -348,14 +325,14 @@ function goBack() {
               <input
                 v-model="newTechnology"
                 type="text"
-                class="devnity-input flex-1"
+                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Digite uma tecnologia"
                 @keyup.enter="addTechnology"
               />
               <button
                 type="button"
                 @click="addTechnology"
-                class="devnity-button-secondary inline-flex items-center gap-2"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 <Plus class="h-4 w-4" />
                 Adicionar
@@ -383,7 +360,7 @@ function goBack() {
           </div>
 
           <!-- URLs -->
-          <div class="grid md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 URL do Repositório
@@ -391,10 +368,7 @@ function goBack() {
               <input
                 v-model="form.repository_url"
                 type="url"
-                :class="[
-                  'devnity-input',
-                  errors.repository_url ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="https://github.com/..."
               />
               <p v-if="errors.repository_url" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -409,10 +383,7 @@ function goBack() {
               <input
                 v-model="form.demo_url"
                 type="url"
-                :class="[
-                  'devnity-input',
-                  errors.demo_url ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="https://demo.example.com"
               />
               <p v-if="errors.demo_url" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -427,10 +398,7 @@ function goBack() {
               <input
                 v-model="form.production_url"
                 type="url"
-                :class="[
-                  'devnity-input',
-                  errors.production_url ? 'border-red-300 dark:border-red-600' : ''
-                ]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="https://example.com"
               />
               <p v-if="errors.production_url" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -438,18 +406,18 @@ function goBack() {
               </p>
             </div>
           </div>
+        </div>
 
-          <!-- Observações -->
+        <!-- Observações -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Observações</h3>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Observações
+              Notas do Projeto
             </label>
             <textarea
               v-model="form.notes"
-              :class="[
-                'devnity-input',
-                errors.notes ? 'border-red-300 dark:border-red-600' : ''
-              ]"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows="4"
               placeholder="Observações gerais sobre o projeto"
             />
@@ -457,30 +425,30 @@ function goBack() {
               {{ errors.notes }}
             </p>
           </div>
+        </div>
 
-          <!-- Botões -->
-          <div class="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              @click="goBack"
-              class="devnity-button-secondary"
-              :disabled="processing"
-            >
-              <X class="h-4 w-4 mr-2" />
-              Cancelar
-            </button>
-            
-            <button
-              type="submit"
-              class="devnity-button-primary"
-              :disabled="!isFormValid || processing"
-            >
-              <Save class="h-4 w-4 mr-2" />
-              {{ processing ? 'Salvando...' : 'Criar Projeto' }}
-            </button>
-          </div>
-        </form>
-      </div>
+        <!-- Botões -->
+        <div class="flex justify-end gap-4">
+          <button
+            type="button"
+            @click="goBack"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            :disabled="processing"
+          >
+            <X class="h-4 w-4 mr-2 inline" />
+            Cancelar
+          </button>
+          
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50"
+            :disabled="!isFormValid || processing"
+          >
+            <Save class="h-4 w-4 mr-2 inline" />
+            {{ processing ? 'Salvando...' : 'Criar Projeto' }}
+          </button>
+        </div>
+      </form>
     </div>
   </AppLayout>
 </template>
