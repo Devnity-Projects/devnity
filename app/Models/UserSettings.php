@@ -37,7 +37,7 @@ class UserSettings extends Model
     public static function getDefaultSettings(): array
     {
         return [
-            'theme' => 'light',
+            'theme' => 'system',
             'language' => 'pt-BR',
             'email_notifications' => true,
             'browser_notifications' => true,

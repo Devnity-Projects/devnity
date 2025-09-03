@@ -19,7 +19,17 @@ class SettingsController extends Controller
         $settings = $user->getOrCreateSettings();
         
         return Inertia::render('Settings/Index', [
-            'settings' => $settings,
+            'settings' => [
+                'theme' => $settings->theme,
+                'language' => $settings->language,
+                'timezone' => $settings->timezone,
+                'date_format' => $settings->date_format,
+                'time_format' => $settings->time_format,
+                'email_notifications' => $settings->email_notifications,
+                'browser_notifications' => $settings->browser_notifications,
+                'task_reminders' => $settings->task_reminders,
+                'project_updates' => $settings->project_updates,
+            ],
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -35,19 +45,23 @@ class SettingsController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'theme' => ['required', 'string', 'in:light,dark'],
-            'language' => ['required', 'string', 'in:pt-BR,en-US'],
+            'theme' => ['required', 'string', 'in:light,dark,system'],
+            'language' => ['required', 'string', 'in:pt-BR,en-US,es-ES'],
+            'timezone' => ['required', 'string'],
+            'date_format' => ['nullable', 'string', 'in:d/m/Y,m/d/Y,Y-m-d'],
+            'time_format' => ['nullable', 'string', 'in:H:i,h:i A'],
             'email_notifications' => ['boolean'],
             'browser_notifications' => ['boolean'],
             'task_reminders' => ['boolean'],
             'project_updates' => ['boolean'],
-            'timezone' => ['required', 'string'],
-            'date_format' => ['required', 'string', 'in:d/m/Y,m/d/Y,Y-m-d'],
-            'time_format' => ['required', 'string', 'in:H:i,h:i A'],
         ]);
 
         $user = $request->user();
         $settings = $user->getOrCreateSettings();
+        
+        // Definir valores padrão se não fornecidos
+        $validated['date_format'] = $validated['date_format'] ?? 'd/m/Y';
+        $validated['time_format'] = $validated['time_format'] ?? 'H:i';
         
         $settings->update($validated);
 

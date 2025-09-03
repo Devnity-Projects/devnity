@@ -1,44 +1,57 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 interface Settings {
-  theme?: string
-  notifications?: {
-    email?: boolean
-    push?: boolean
-    marketing?: boolean
-  }
-  language?: string
-  timezone?: string
+  theme: string
+  language: string
+  timezone: string
+  date_format: string
+  time_format: string
+  email_notifications: boolean
+  browser_notifications: boolean
+  task_reminders: boolean
+  project_updates: boolean
 }
 
 interface Props {
-  settings?: Settings
+  settings: Settings
+  status?: string
 }
 
 const props = defineProps<Props>()
 
 const form = useForm({
   theme: props.settings?.theme || 'system',
-  notifications: {
-    email: props.settings?.notifications?.email || true,
-    push: props.settings?.notifications?.push || true,
-    marketing: props.settings?.notifications?.marketing || false
-  },
   language: props.settings?.language || 'pt-BR',
-  timezone: props.settings?.timezone || 'America/Sao_Paulo'
+  timezone: props.settings?.timezone || 'America/Sao_Paulo',
+  date_format: props.settings?.date_format || 'd/m/Y',
+  time_format: props.settings?.time_format || 'H:i',
+  email_notifications: props.settings?.email_notifications || true,
+  browser_notifications: props.settings?.browser_notifications || true,
+  task_reminders: props.settings?.task_reminders || true,
+  project_updates: props.settings?.project_updates || false
 })
 
 const updateSettings = () => {
-  form.post(route('settings.update'))
+  form.patch(route('settings.update'))
 }
 </script>
 
 <template>
   <AppLayout>
     <div class="space-y-8">
+      <!-- Status Message -->
+      <div v-if="props.status" class="bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <p class="ml-3 text-sm font-medium text-green-800 dark:text-green-200">{{ props.status }}</p>
+        </div>
+      </div>
+
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -183,7 +196,7 @@ const updateSettings = () => {
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input 
-                      v-model="form.notifications.email" 
+                      v-model="form.email_notifications" 
                       type="checkbox" 
                       class="sr-only peer"
                     >
@@ -194,7 +207,7 @@ const updateSettings = () => {
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
                     <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      Notificações push
+                      Notificações do navegador
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       Receba notificações instantâneas no navegador
@@ -202,7 +215,7 @@ const updateSettings = () => {
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input 
-                      v-model="form.notifications.push" 
+                      v-model="form.browser_notifications" 
                       type="checkbox" 
                       class="sr-only peer"
                     >
@@ -213,15 +226,34 @@ const updateSettings = () => {
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
                     <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      Marketing e promoções
+                      Lembretes de tarefas
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                      Receba ofertas especiais e novidades
+                      Receba lembretes sobre tarefas pendentes
                     </p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input 
-                      v-model="form.notifications.marketing" 
+                      v-model="form.task_reminders" 
+                      type="checkbox" 
+                      class="sr-only peer"
+                    >
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Atualizações de projetos
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Receba notificações sobre mudanças em projetos
+                    </p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      v-model="form.project_updates" 
                       type="checkbox" 
                       class="sr-only peer"
                     >
