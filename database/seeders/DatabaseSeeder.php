@@ -25,5 +25,9 @@ class DatabaseSeeder extends Seeder
             'bio' => 'Administrador do sistema Devnity',
         ]);
 
+        // Seed financial categories
+        $this->call([
+            FinancialCategorySeeder::class,
+        ]);
     }
 }

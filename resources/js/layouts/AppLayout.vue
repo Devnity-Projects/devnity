@@ -62,6 +62,7 @@ const nav = [
   { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos' },
   { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento' },
   { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos' },
+  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira' },
   { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte' },
 ]
 
