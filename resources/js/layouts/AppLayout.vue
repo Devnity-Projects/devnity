@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { Link } from '@inertiajs/vue3'
 import { 
   Home, 
   Users, 
@@ -24,14 +24,9 @@ import {
 
 import FlashToasts from '@/components/ui/toast/FlashToasts.vue'
 import GlobalSearch from '@/components/GlobalSearch.vue'
+import { useUserSettings } from '@/composables/useUserSettings'
 
-const user = usePage().props.auth?.user
-
-// Dark mode
-const isDark = ref(
-  localStorage.theme === 'dark' ||
-  (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-)
+const { user, isDarkTheme, applyTheme, toggleTheme, setupSystemThemeListener } = useUserSettings()
 
 // Global search
 const globalSearch = ref()
@@ -40,19 +35,25 @@ const openSearch = () => {
   globalSearch.value?.open()
 }
 
-const toggleDark = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.theme = isDark.value ? 'dark' : 'light'
-}
+// Use the theme toggle from the composable
+const toggleDark = toggleTheme
 
-watch(isDark, val => {
-  document.documentElement.classList.toggle('dark', val)
-  localStorage.theme = val ? 'dark' : 'light'
-})
+// Setup theme management
+let cleanupSystemListener: (() => void) | null = null
 
 onMounted(() => {
-  document.documentElement.classList.toggle('dark', isDark.value)
+  // Apply the user's theme preference
+  applyTheme()
+  
+  // Setup system theme change listener
+  cleanupSystemListener = setupSystemThemeListener()
+})
+
+onUnmounted(() => {
+  // Cleanup listener
+  if (cleanupSystemListener) {
+    cleanupSystemListener()
+  }
 })
 
 // Navigation
@@ -85,7 +86,12 @@ const handleClickOutside = (e: MouseEvent) => {
 }
 
 onMounted(() => {
-  document.documentElement.classList.toggle('dark', isDark.value)
+  // Apply the user's theme preference
+  applyTheme()
+  
+  // Setup system theme change listener
+  cleanupSystemListener = setupSystemThemeListener()
+  
   window.addEventListener('click', handleClickOutside)
   
   // Close mobile menu when window resizes to desktop
@@ -216,7 +222,7 @@ onMounted(() => {
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Alternar tema"
           >
-            <Sun v-if="isDark" class="h-5 w-5 text-gray-600 dark:text-gray-300" />
+            <Sun v-if="isDarkTheme" class="h-5 w-5 text-gray-600 dark:text-gray-300" />
             <Moon v-else class="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
 

@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useUserSettings } from '@/composables/useUserSettings'
 
 interface Settings {
   theme: string
@@ -22,6 +23,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const { applyTheme } = useUserSettings()
+
 const form = useForm({
   theme: props.settings?.theme || 'system',
   language: props.settings?.language || 'pt-BR',
@@ -35,7 +38,12 @@ const form = useForm({
 })
 
 const updateSettings = () => {
-  form.patch(route('settings.update'))
+  form.patch(route('settings.update'), {
+    onSuccess: () => {
+      // Apply theme immediately after successful save
+      applyTheme()
+    }
+  })
 }
 </script>
 

@@ -34,6 +34,17 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    settings?: {
+        theme: 'light' | 'dark' | 'system';
+        language: string;
+        timezone: string;
+        date_format: string;
+        time_format: string;
+        email_notifications: boolean;
+        browser_notifications: boolean;
+        task_reminders: boolean;
+        project_updates: boolean;
+    };
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

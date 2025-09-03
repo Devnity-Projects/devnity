@@ -49,6 +49,10 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'avatar_url' => $request->user()->avatar_url,
+                    'settings' => $request->user()->getOrCreateSettings()->only([
+                        'theme', 'language', 'timezone', 'date_format', 'time_format',
+                        'email_notifications', 'browser_notifications', 'task_reminders', 'project_updates'
+                    ]),
                 ] : null,
             ],
             'ziggy' => [
