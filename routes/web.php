@@ -89,6 +89,27 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', SupportCategoryController::class)->except(['show']);
     });
 
+    // Financial Routes
+    Route::prefix('financial')->name('financial.')->group(function () {
+        // Dashboard
+        Route::get('/', [FinancialDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/export', [FinancialDashboardController::class, 'export'])->name('export');
+        
+        // Categories
+        Route::resource('categories', FinancialCategoryController::class);
+        Route::post('categories/{category}/toggle-status', [FinancialCategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+        Route::delete('categories/bulk-destroy', [FinancialCategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
+        Route::patch('categories/bulk-toggle-status', [FinancialCategoryController::class, 'bulkToggleStatus'])->name('categories.bulk-toggle-status');
+        
+        // Transactions
+        Route::resource('transactions', FinancialTransactionController::class);
+        Route::patch('transactions/{transaction}/mark-as-paid', [FinancialTransactionController::class, 'markAsPaid'])->name('transactions.mark-as-paid');
+        Route::patch('transactions/{transaction}/mark-as-pending', [FinancialTransactionController::class, 'markAsPending'])->name('transactions.mark-as-pending');
+        Route::patch('transactions/{transaction}/cancel', [FinancialTransactionController::class, 'cancel'])->name('transactions.cancel');
+        Route::delete('transactions/bulk-destroy', [FinancialTransactionController::class, 'bulkDestroy'])->name('transactions.bulk-destroy');
+        Route::patch('transactions/bulk-update-status', [FinancialTransactionController::class, 'bulkUpdateStatus'])->name('transactions.bulk-update-status');
+    });
+
     // Settings Routes
     Route::prefix('settings')->name('settings.')->middleware('ensure.user.settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         // Seed financial categories
         $this->call([
             FinancialCategorySeeder::class,
+            FinancialTransactionSeeder::class,
         ]);
     }
 }
