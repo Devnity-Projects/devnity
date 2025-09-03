@@ -17,6 +17,27 @@ import {
   X
 } from 'lucide-vue-next'
 
+interface PaginationLink {
+  url?: string | null
+  label?: string | null
+  active?: boolean
+}
+
+interface PaginationMeta {
+  current_page: number
+  from: number
+  last_page: number
+  per_page: number
+  to: number
+  total: number
+}
+
+interface PaginatedData<T> {
+  data: T[]
+  links: PaginationLink[]
+  meta: PaginationMeta
+}
+
 interface Category {
   id: number
   name: string
@@ -33,11 +54,7 @@ interface Category {
 }
 
 interface Props {
-  categories: {
-    data: Category[]
-    links: any[]
-    meta: any
-  }
+  categories: PaginatedData<Category>
   filters: any
   typeOptions: Record<string, string>
 }
@@ -473,9 +490,9 @@ const formatCurrency = (value: number) => {
             </div>
             
             <div class="flex items-center gap-2">
-              <template v-for="link in categories.links" :key="link.label">
+              <template v-for="link in categories.links" :key="link?.label || Math.random()">
                 <button
-                  v-if="link.url"
+                  v-if="link?.url && link?.label"
                   @click="router.get(link.url)"
                   class="px-3 py-1.5 text-sm border rounded-lg transition-colors"
                   :class="link.active 
@@ -484,7 +501,7 @@ const formatCurrency = (value: number) => {
                   v-html="link.label"
                 ></button>
                 <span
-                  v-else
+                  v-else-if="link?.label"
                   class="px-3 py-1.5 text-sm text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg"
                   v-html="link.label"
                 ></span>
