@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { 
   FolderKanban,
@@ -113,29 +113,29 @@ const quickStats = computed(() => [
     label: 'Total de Tarefas',
     value: props.taskStats.total,
     icon: ListTodo,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50'
+    color: 'text-blue-600 dark:text-blue-400',
+    bgColor: 'bg-blue-50 dark:bg-blue-900/20'
   },
   {
     label: 'Concluídas',
     value: props.taskStats.completed,
     icon: CheckSquare,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50'
+    color: 'text-green-600 dark:text-green-400',
+    bgColor: 'bg-green-50 dark:bg-green-900/20'
   },
   {
     label: 'Em Progresso',
     value: props.taskStats.in_progress,
     icon: PlayCircle,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50'
+    color: 'text-yellow-600 dark:text-yellow-400',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
   },
   {
     label: 'Atrasadas',
     value: props.taskStats.overdue,
     icon: AlertCircle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50'
+    color: 'text-red-600 dark:text-red-400',
+    bgColor: 'bg-red-50 dark:bg-red-900/20'
   }
 ])
 
@@ -202,7 +202,7 @@ function goBack() {
           <div class="flex items-center gap-3">
             <Link
               :href="`/projects/${project.id}/edit`"
-              class="devnity-button-secondary inline-flex items-center gap-2"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
             >
               <Edit class="h-4 w-4" />
               Editar
@@ -210,7 +210,7 @@ function goBack() {
             
             <button
               @click="confirmDelete"
-              class="devnity-button-danger inline-flex items-center gap-2"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
             >
               <Trash2 class="h-4 w-4" />
               Excluir
@@ -253,12 +253,11 @@ function goBack() {
             v-for="stat in quickStats"
             :key="stat.label"
             :class="[
-              'flex items-center gap-3 p-4 rounded-lg border',
-              stat.bgColor,
-              'border-gray-200 dark:border-gray-700'
+              'flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700',
+              stat.bgColor
             ]"
           >
-            <div :class="['p-2 rounded-lg', stat.color.replace('text-', 'bg-').replace('-600', '-100')]">
+            <div class="p-2 rounded-lg bg-white dark:bg-gray-700">
               <component :is="stat.icon" :class="['h-5 w-5', stat.color]" />
             </div>
             <div>
