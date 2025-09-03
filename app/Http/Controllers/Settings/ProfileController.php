@@ -47,13 +47,22 @@ class ProfileController extends Controller
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
             // Delete old avatar if exists
-            if ($user->avatar && file_exists(storage_path('app/public/avatars/' . $user->avatar))) {
-                unlink(storage_path('app/public/avatars/' . $user->avatar));
+            if ($user->avatar && \Storage::disk('public')->exists('avatars/' . $user->avatar)) {
+                \Storage::disk('public')->delete('avatars/' . $user->avatar);
             }
             
             $avatarName = time() . '_' . $user->id . '.' . $request->file('avatar')->getClientOriginalExtension();
-            $request->file('avatar')->storeAs('public/avatars', $avatarName);
-            $validated['avatar'] = $avatarName;
+            
+            // Store the file using the public disk
+            $uploadedFile = $request->file('avatar')->storeAs('avatars', $avatarName, 'public');
+            
+            if ($uploadedFile) {
+                $validated['avatar'] = $avatarName;
+                \Log::info('Avatar uploaded successfully: ' . $avatarName);
+            } else {
+                \Log::error('Failed to upload avatar');
+                return back()->withErrors(['avatar' => 'Falha ao fazer upload da imagem']);
+            }
         }
 
         $user->fill($validated);
@@ -64,7 +73,8 @@ class ProfileController extends Controller
 
         $user->save();
 
-        return back()->with('status', 'Perfil atualizado com sucesso!');
+        // Use Inertia back to refresh user data
+        return \Inertia\Inertia::back()->with('status', 'Perfil atualizado com sucesso!');
     }
 
     /**
@@ -75,13 +85,13 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Delete avatar if exists
-        if ($user->avatar && file_exists(storage_path('app/public/avatars/' . $user->avatar))) {
-            unlink(storage_path('app/public/avatars/' . $user->avatar));
+        if ($user->avatar && \Storage::disk('public')->exists('avatars/' . $user->avatar)) {
+            \Storage::disk('public')->delete('avatars/' . $user->avatar);
         }
 
         $user->update(['avatar' => null]);
 
-        return back()->with('status', 'Avatar removido com sucesso!');
+        return \Inertia\Inertia::back()->with('status', 'Avatar removido com sucesso!');
     }
 
     /**

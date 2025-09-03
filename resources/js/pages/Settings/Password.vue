@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 const form = useForm({
   current_password: '',
@@ -14,7 +14,7 @@ const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
 
 const updatePassword = () => {
-  form.put(route('settings.password.update'), {
+  form.patch(route('settings.password.update'), {
     onSuccess: () => {
       form.reset()
     }

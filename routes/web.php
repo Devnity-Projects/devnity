@@ -93,7 +93,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/reset', [SettingsController::class, 'reset'])->name('reset');
         
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::match(['post', 'patch'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
         
@@ -103,4 +103,15 @@ Route::middleware('auth')->group(function () {
 
     // API Routes
     Route::get('/api/search', [SearchController::class, 'index'])->name('api.search');
+    
+    // Avatar route for clean URLs
+    Route::get('/avatars/{filename}', function ($filename) {
+        $path = storage_path('app/public/avatars/' . $filename);
+        
+        if (!file_exists($path)) {
+            abort(404);
+        }
+        
+        return response()->file($path);
+    })->name('avatar.show');
 });

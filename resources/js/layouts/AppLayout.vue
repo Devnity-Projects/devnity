@@ -227,8 +227,16 @@ onMounted(() => {
               class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Menu do perfil"
             >
-              <div class="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-sm font-semibold">
-                {{ user?.name?.charAt(0).toUpperCase() }}
+              <div class="h-8 w-8 rounded-lg overflow-hidden">
+                <img
+                  v-if="user?.avatar_url"
+                  :src="user.avatar_url"
+                  :alt="user.name"
+                  class="h-full w-full object-cover"
+                >
+                <div v-else class="h-full w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
+                  {{ user?.name?.charAt(0).toUpperCase() }}
+                </div>
               </div>
               <span class="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">
                 {{ user?.name }}
