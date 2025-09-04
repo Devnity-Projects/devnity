@@ -22,7 +22,7 @@ use App\Http\Controllers\FinancialTransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('Auth/Login'))->name('login');
+Route::get('/', fn () => Inertia::render('auth/Login'))->name('login');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
