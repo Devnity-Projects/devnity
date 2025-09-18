@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\PasswordController;
+use App\Http\Controllers\Settings\ImpersonationController;
 use App\Http\Controllers\FinancialDashboardController;
 use App\Http\Controllers\FinancialCategoryController;
 use App\Http\Controllers\FinancialTransactionController;
@@ -140,7 +141,12 @@ Route::middleware('auth')->group(function () {
     Route::prefix('settings')->name('settings.')->middleware('ensure.user.settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::patch('/', [SettingsController::class, 'update'])->name('update');
-        Route::post('/reset', [SettingsController::class, 'reset'])->name('reset');
+        Route::post('/reset', [SettingsController::class, 'reset'])->name('reset');    // Removidos: toggles próprios de permissão/role
+        // Admin toggles (manage other users)
+        Route::middleware('permission:manage users')->group(function () {
+            Route::post('/admin/roles/toggle', [SettingsController::class, 'adminToggleUserRole'])->name('admin.roles.toggle');
+            Route::post('/admin/permissions/toggle', [SettingsController::class, 'adminToggleUserPermission'])->name('admin.permissions.toggle');
+        });
         
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::match(['post', 'patch'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -149,6 +155,15 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/password', [PasswordController::class, 'edit'])->name('password.edit');
         Route::patch('/password', [PasswordController::class, 'update'])->name('password.update');
+
+    // Admin permissions tab
+    Route::get('/permissions', [SettingsController::class, 'permissions'])->name('permissions');
+
+        // Impersonation (visualizar como)
+        Route::middleware('permission:manage users')->group(function () {
+            Route::post('/impersonate/start', [ImpersonationController::class, 'start'])->name('impersonate.start');
+        });
+        Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
     });
 
     

@@ -6,6 +6,37 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ClientResource extends JsonResource
 {
+    use \App\Support\AuthorizesFields;
+
+    /**
+     * Campos sensíveis e as permissões necessárias para visualizá-los.
+     * Exemplo: 'document' => 'clients.view_document'
+     * Vários perms: 'notes' => ['clients.view_notes', 'clients.manage']
+     *
+     * @var array<string,string|array<int,string>>
+     */
+    protected array $fieldPermissions = [
+        'document' => 'clients.view_document',
+        'formatted_document' => 'clients.view_document',
+        'email' => 'clients.view_contact',
+        'phone' => 'clients.view_contact',
+        'formatted_phone' => 'clients.view_contact',
+        'responsible_email' => 'clients.view_contact',
+        'responsible_phone' => 'clients.view_contact',
+        'state_registration' => 'clients.view_tax_info',
+        'municipal_registration' => 'clients.view_tax_info',
+        'zip_code' => 'clients.view_address',
+        'formatted_zip_code' => 'clients.view_address',
+        'address' => 'clients.view_address',
+        'number' => 'clients.view_address',
+        'complement' => 'clients.view_address',
+        'neighborhood' => 'clients.view_address',
+        'city' => 'clients.view_address',
+        'state' => 'clients.view_address',
+        'country' => 'clients.view_address',
+        'full_address' => 'clients.view_address',
+        'notes' => ['clients.view_notes', 'clients.manage'],
+    ];
     /**
      * Transform the resource into an array.
      *
@@ -13,7 +44,7 @@ class ClientResource extends JsonResource
      */
     public function toArray($request): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'name' => $this->name,
             'type' => $this->type,
@@ -49,5 +80,8 @@ class ClientResource extends JsonResource
             'updated_at_formatted' => $this->updated_at?->format('d/m/Y H:i'),
             'created_at_diff' => $this->created_at?->diffForHumans(),
         ];
+
+        // Filtrar campos por permissões
+        return $this->filterFieldsByPermissions($data, $this->fieldPermissions, $request);
     }
 }

@@ -12,7 +12,7 @@ class ClientPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true; // Todos usuários autenticados podem ver clientes
+        return $user->can('clients.view') || $user->can('clients.manage');
     }
 
     /**
@@ -20,9 +20,7 @@ class ClientPolicy
      */
     public function view(User $user, Client $client): bool
     {
-        // Por enquanto, todos usuários autenticados podem ver qualquer cliente
-        // Você pode implementar lógica mais específica aqui se necessário
-        return true;
+        return $user->can('clients.view') || $user->can('clients.manage');
     }
 
     /**
@@ -30,7 +28,7 @@ class ClientPolicy
      */
     public function create(User $user): bool
     {
-        return true; // Todos usuários autenticados podem criar clientes
+        return $user->can('clients.create') || $user->can('clients.manage');
     }
 
     /**
@@ -38,9 +36,7 @@ class ClientPolicy
      */
     public function update(User $user, Client $client): bool
     {
-        // Por enquanto, todos usuários autenticados podem editar qualquer cliente
-        // Você pode implementar lógica baseada em roles/permissions aqui
-        return true;
+        return $user->can('clients.update') || $user->can('clients.manage');
     }
 
     /**
@@ -48,9 +44,7 @@ class ClientPolicy
      */
     public function delete(User $user, Client $client): bool
     {
-        // Por enquanto, todos usuários autenticados podem deletar qualquer cliente
-        // Você pode implementar lógica baseada em roles/permissions aqui
-        return true;
+        return $user->can('clients.delete') || $user->can('clients.manage');
     }
 
     /**
@@ -58,9 +52,7 @@ class ClientPolicy
      */
     public function bulkOperations(User $user): bool
     {
-        // Apenas usuários autenticados podem fazer operações em massa
-        // Você pode adicionar verificação de roles aqui se necessário
-        return true;
+        return $user->can('clients.manage');
     }
 
     /**
@@ -68,7 +60,6 @@ class ClientPolicy
      */
     public function export(User $user): bool
     {
-        // Apenas usuários autenticados podem exportar dados
-        return true;
+        return $user->can('clients.export') || $user->can('clients.manage');
     }
 }

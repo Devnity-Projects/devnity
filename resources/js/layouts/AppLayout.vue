@@ -26,8 +26,15 @@ import {
 import FlashToasts from '@/components/ui/toast/FlashToasts.vue'
 import GlobalSearch from '@/components/GlobalSearch.vue'
 import { useUserSettings } from '@/composables/useUserSettings'
+import { router, usePage as useInertiaPage } from '@inertiajs/vue3'
 
 const { user, isDarkTheme, applyTheme, toggleTheme, setupSystemThemeListener } = useUserSettings()
+const inertiaPage = useInertiaPage()
+const isImpersonated = computed(() => Boolean((inertiaPage.props as any)?.auth?.impersonated))
+const impersonator = computed(() => (inertiaPage.props as any)?.auth?.impersonator)
+const stopImpersonation = () => {
+  router.post(route('settings.impersonate.stop'), {}, { preserveScroll: true })
+}
 
 // Global search
 const globalSearch = ref()
@@ -120,6 +127,18 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <!-- Impersonation Banner -->
+    <div v-if="isImpersonated" class="w-full bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 text-sm">
+      <div class="container mx-auto max-w-screen-2xl px-4 sm:px-6 py-2 flex items-center justify-between">
+        <div>
+          Você está visualizando como outro usuário.
+          <span v-if="impersonator" class="ml-2 opacity-80">(Admin original: {{ impersonator.name }} — {{ impersonator.email }})</span>
+        </div>
+        <button @click="stopImpersonation" class="px-3 py-1 rounded-md bg-amber-200 hover:bg-amber-300 text-amber-900 dark:bg-amber-800 dark:hover:bg-amber-700 dark:text-amber-100 transition-colors">
+          Voltar para admin
+        </button>
+      </div>
+    </div>
     <FlashToasts />
     
     <!-- Header -->

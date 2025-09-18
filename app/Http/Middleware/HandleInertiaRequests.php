@@ -39,6 +39,19 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $impersonator = null;
+        if ($request->session()->has('impersonator_id')) {
+            $impId = (int) $request->session()->get('impersonator_id');
+            $admin = \App\Models\User::find($impId);
+            if ($admin) {
+                $impersonator = [
+                    'id' => $admin->id,
+                    'name' => $admin->name,
+                    'email' => $admin->email,
+                ];
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -49,11 +62,15 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'avatar_url' => $request->user()->avatar_url,
+                    'roles' => $request->user()->getRoleNames(),
+                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
                     'settings' => $request->user()->getOrCreateSettings()->only([
                         'theme', 'language', 'timezone', 'date_format', 'time_format',
                         'email_notifications', 'browser_notifications', 'task_reminders', 'project_updates'
                     ]),
                 ] : null,
+                'impersonated' => (bool) $impersonator,
+                'impersonator' => $impersonator,
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
