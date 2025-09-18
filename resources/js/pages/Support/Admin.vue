@@ -301,7 +301,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/layouts/AppLayout.vue'
+import AuthenticatedLayout from '@/Layouts/AppLayout.vue'
 import { debounce } from 'lodash'
 
 const props = defineProps({

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
+import { useAbility } from '@/composables/useAbility'
 import { ref, computed } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
@@ -23,6 +24,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { can } = useAbility()
 
 // Admin state
 const selectedAdminUserId = ref<number | null>(props.admin?.target?.id ?? null)
@@ -167,7 +169,7 @@ const impersonateSelected = () => {
 
               <!-- Impersonation actions -->
               <div class="flex items-center gap-3">
-                <button v-if="!isSelfSelected" @click="impersonateSelected" class="px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">Visualizar como selecionado</button>
+                <button v-if="!isSelfSelected && can('manage users')" @click="impersonateSelected" class="px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">Visualizar como selecionado</button>
                 <span class="text-xs text-gray-500 dark:text-gray-400">Apenas para administradores com permissão "manage users".</span>
               </div>
 
@@ -181,7 +183,7 @@ const impersonateSelected = () => {
                       <span v-if="adminTargetRoles.includes(role)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Atribuída</span>
                       <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">Não atribuída</span>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
+                    <label v-if="can('manage users')" class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" class="sr-only peer" :checked="adminTargetRoles.includes(role)" @change="adminToggleRole(role)">
                       <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                     </label>
@@ -203,7 +205,7 @@ const impersonateSelected = () => {
                       </div>
                       <p v-if="permMeta[perm]?.description" class="text-xs text-gray-500 dark:text-gray-400">{{ permMeta[perm]?.description }}</p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer mt-1">
+                    <label v-if="can('manage users')" class="relative inline-flex items-center cursor-pointer mt-1">
                       <input type="checkbox" class="sr-only peer" :checked="adminTargetPermsDirect.includes(perm)" @change="adminTogglePermission(perm)">
                       <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                     </label>

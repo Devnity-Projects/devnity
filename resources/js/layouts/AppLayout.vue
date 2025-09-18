@@ -27,6 +27,7 @@ import FlashToasts from '@/components/ui/toast/FlashToasts.vue'
 import GlobalSearch from '@/components/GlobalSearch.vue'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { router, usePage as useInertiaPage } from '@inertiajs/vue3'
+import { useAbility } from '@/composables/useAbility'
 
 const { user, isDarkTheme, applyTheme, toggleTheme, setupSystemThemeListener } = useUserSettings()
 const inertiaPage = useInertiaPage()
@@ -64,15 +65,17 @@ onUnmounted(() => {
   }
 })
 
-// Navigation
+// Navigation (with optional permission requirements)
+const { can } = useAbility()
 const nav = [
   { label: 'Dashboard', href: '/dashboard', icon: Home, description: 'Visão geral do sistema' },
-  { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos' },
-  { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento' },
+  { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos', perm: ['clients.view','clients.manage'] },
+  { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento', perm: ['manage projects'] },
   { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos' },
-  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira' },
+  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['manage finances'] },
   { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte' },
 ]
+const permittedNav = computed(() => nav.filter((i: any) => !i.perm || can(...(Array.isArray(i.perm) ? i.perm : [i.perm]))))
 
 // UI State
 const showProfile = ref(false)
@@ -175,7 +178,7 @@ onMounted(() => {
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-2">
           <Link
-            v-for="item in nav"
+            v-for="item in permittedNav"
             :key="item.href"
             :href="item.href"
             class="relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 group"
@@ -336,7 +339,7 @@ onMounted(() => {
     >
         <div class="space-y-2">
           <Link
-            v-for="item in nav"
+            v-for="item in permittedNav"
             :key="item.href"
             :href="item.href"
             @click="showMobileMenu = false"

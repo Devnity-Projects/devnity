@@ -167,7 +167,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/layouts/AppLayout.vue'
+import AuthenticatedLayout from '@/Layouts/AppLayout.vue'
 
 defineProps({
     categories: Array

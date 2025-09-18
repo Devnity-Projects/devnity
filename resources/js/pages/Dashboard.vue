@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
+import { ref, onMounted, computed } from 'vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link } from '@inertiajs/vue3'
+import { useAbility } from '@/composables/useAbility'
 import {
   Users,
   FolderKanban,
@@ -28,6 +29,9 @@ const props = defineProps<{
 }>()
 
 const currentTime = ref(new Date())
+const { can } = useAbility()
+const canCreateClient = computed(() => can('clients.create','clients.manage'))
+const canCreateProject = computed(() => can('manage projects'))
 
 // Cards dos indicadores com o novo design
 const cards = [
@@ -180,6 +184,7 @@ onMounted(() => {
             <!-- Quick Actions -->
             <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
               <Link 
+                v-if="canCreateClient"
                 href="/clients/create"
                 class="devnity-button-primary flex items-center gap-2"
               >
@@ -187,6 +192,7 @@ onMounted(() => {
                 Novo Cliente
               </Link>
               <Link 
+                v-if="canCreateProject"
                 href="/projects/create"
                 class="devnity-button-secondary flex items-center gap-2"
               >
@@ -232,6 +238,7 @@ onMounted(() => {
               <h3 class="font-semibold text-gray-900 dark:text-gray-100">Projetos Recentes</h3>
             </div>
             <Link 
+              v-if="can('manage projects')"
               href="/projects" 
               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >
@@ -274,6 +281,7 @@ onMounted(() => {
               <h3 class="font-semibold text-gray-900 dark:text-gray-100">Tarefas Urgentes</h3>
             </div>
             <Link 
+              v-if="can('clients.view','clients.manage')"
               href="/tasks?priority=urgent" 
               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >

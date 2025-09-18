@@ -237,7 +237,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/layouts/AppLayout.vue'
+import AuthenticatedLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps({
     categories: Array,
