@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { useUserSettings } from '@/composables/useUserSettings'
 
 interface Settings {

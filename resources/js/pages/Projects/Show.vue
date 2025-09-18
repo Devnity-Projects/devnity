@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { 
   FolderKanban,
@@ -466,7 +466,7 @@ function goBack() {
             </h2>
             <div class="space-y-3">
               <Link
-                href="/tasks/create"
+                :href="`/tasks/create?project_id=${project.id}`"
                 class="w-full devnity-button-primary inline-flex items-center justify-center gap-2"
               >
                 <ListTodo class="h-4 w-4" />

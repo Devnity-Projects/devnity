@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { 
   Calendar,
   Clock,
@@ -34,10 +34,12 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const initialProjectId = props.selectedProject?.id || (Number(new URLSearchParams(window.location.search).get('project_id')) || '')
+
 const form = useForm({
   title: '',
   description: '',
-  project_id: props.selectedProject?.id || '',
+  project_id: initialProjectId,
   assigned_to: '',
   status: 'todo',
   priority: 'medium',

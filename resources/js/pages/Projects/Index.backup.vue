@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import ProjectStats from '@/components/Projects/ProjectStats.vue'
 import ProjectCard from '@/components/Projects/ProjectCard.vue'
 import BulkActions from '@/components/Projects/BulkActions.vue'
