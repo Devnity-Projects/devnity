@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import { 
   Home, 
@@ -70,6 +71,19 @@ const nav = [
 const showProfile = ref(false)
 const showMobileMenu = ref(false)
 const showNotifications = ref(false)
+
+// Read unread notifications count from Inertia page props if available.
+const page = usePage()
+const unreadNotifications = computed(() => {
+  const props = page.props || (page as any).value || {}
+  // common server-provided prop names: unread_notifications_count, unreadNotifications
+  const count = props.unread_notifications_count ?? props.unreadNotifications ?? 0
+  // if notifications array present, compute unread by `read` flag
+  if (!count && Array.isArray(props.notifications)) {
+    return props.notifications.filter((n: any) => !n.read).length
+  }
+  return Number(count || 0)
+})
 
 const handleClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement
@@ -195,7 +209,7 @@ onMounted(() => {
               aria-label="Notificações"
             >
               <Bell class="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              <div class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
+              <div v-if="unreadNotifications > 0" class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
             </button>
 
             <!-- Notifications Dropdown -->
