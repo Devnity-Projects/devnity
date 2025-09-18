@@ -10,6 +10,10 @@ class Client extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     * Limitado apenas aos campos que devem ser realmente editáveis pelo usuário
+     */
     protected $fillable = [
         'name',
         'type',
@@ -33,11 +37,32 @@ class Client extends Model
         'notes',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     * Campos que não devem aparecer em JSON responses
+     */
+    protected $hidden = [
+        // Adicione aqui campos sensíveis que não devem ser expostos via API
+    ];
+
+    /**
+     * The attributes that should be cast.
+     */
     protected $casts = [
         'type'   => 'string',
         'status' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+    ];
+
+    /**
+     * The attributes that should be guarded.
+     * Campos que nunca devem ser mass assigned
+     */
+    protected $guarded = [
+        'id',
+        'created_at', 
+        'updated_at'
     ];
 
     // Constantes para tipos de cliente

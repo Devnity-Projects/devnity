@@ -46,7 +46,7 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
             // Adicione as views SPA:
-        Fortify::loginView(fn () => inertia('auth/Login'));
+        Fortify::loginView(fn () => inertia('Auth/Login'));
         Fortify::registerView(fn () => inertia('auth/Register'));
         Fortify::requestPasswordResetLinkView(fn () => inertia('auth/ForgotPassword'));
         Fortify::resetPasswordView(fn ($request) => inertia('auth/ResetPassword', [

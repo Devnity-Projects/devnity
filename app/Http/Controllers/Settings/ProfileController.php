@@ -57,7 +57,8 @@ class ProfileController extends Controller
             $uploadedFile = $request->file('avatar')->storeAs('avatars', $avatarName, 'public');
             
             if ($uploadedFile) {
-                $validated['avatar'] = $avatarName;
+                // Update avatar directly since it's guarded
+                $user->avatar = $avatarName;
                 \Log::info('Avatar uploaded successfully: ' . $avatarName);
             } else {
                 \Log::error('Failed to upload avatar');
@@ -65,6 +66,8 @@ class ProfileController extends Controller
             }
         }
 
+        // Remove avatar from validated data since we handle it separately
+        unset($validated['avatar']);
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
@@ -73,8 +76,11 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Use Inertia back to refresh user data
-        return \Inertia\Inertia::back()->with('status', 'Perfil atualizado com sucesso!');
+        // Force reload user data to ensure avatar_url is updated  
+        $user->refresh();
+
+        // Use 303 redirect to force Inertia to make a fresh GET request
+        return redirect()->route('settings.profile.edit', [], 303)->with('status', 'Perfil atualizado com sucesso!');
     }
 
     /**
@@ -89,9 +95,11 @@ class ProfileController extends Controller
             \Storage::disk('public')->delete('avatars/' . $user->avatar);
         }
 
-        $user->update(['avatar' => null]);
+        // Update avatar directly since it's guarded
+        $user->avatar = null;
+        $user->save();
 
-        return \Inertia\Inertia::back()->with('status', 'Avatar removido com sucesso!');
+        return redirect()->route('settings.profile.edit', [], 303)->with('status', 'Avatar removido com sucesso!');
     }
 
     /**

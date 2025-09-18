@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ClientRequest;
+use App\Http\Requests\ClientRequestNew;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
 class ClientController extends Controller
 {
+    use AuthorizesRequests;
     public function index(Request $request): InertiaResponse
     {
+        $this->authorize('viewAny', Client::class);
+
         $query = Client::query();
 
         // Search filter
@@ -66,12 +70,16 @@ class ClientController extends Controller
 
     public function create(): InertiaResponse
     {
+        $this->authorize('create', Client::class);
+        
         return Inertia::render('Clients/Create');
     }
 
-    public function store(ClientRequest $request): RedirectResponse
+    public function store(ClientRequestNew $request): RedirectResponse
     {
-        $client = Client::create($request->validated());
+        $this->authorize('create', Client::class);
+
+        $client = Client::create($request->safeValidated());
 
         return Redirect::route('clients.show', $client)
             ->with('success', 'Cliente criado com sucesso!');
@@ -79,6 +87,8 @@ class ClientController extends Controller
 
     public function show(Client $client): InertiaResponse
     {
+        $this->authorize('view', $client);
+
         $client->load(['projects' => function($query) {
             $query->orderBy('created_at', 'desc')->limit(5);
         }]);
@@ -92,14 +102,18 @@ class ClientController extends Controller
 
     public function edit(Client $client): InertiaResponse
     {
+        $this->authorize('update', $client);
+        
         return Inertia::render('Clients/Edit', [
             'client' => new ClientResource($client),
         ]);
     }
 
-    public function update(ClientRequest $request, Client $client): RedirectResponse
+    public function update(ClientRequestNew $request, Client $client): RedirectResponse
     {
-        $client->update($request->validated());
+        $this->authorize('update', $client);
+
+        $client->update($request->safeValidated());
 
         return Redirect::route('clients.show', $client)
             ->with('success', 'Cliente atualizado com sucesso!');
@@ -107,6 +121,8 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        $this->authorize('delete', $client);
+
         $client->delete();
 
         return Redirect::route('clients.index')
@@ -115,6 +131,8 @@ class ClientController extends Controller
 
     public function bulkDestroy(Request $request): RedirectResponse
     {
+        $this->authorize('bulkOperations', Client::class);
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:clients,id'
@@ -128,6 +146,8 @@ class ClientController extends Controller
 
     public function bulkToggleStatus(Request $request): RedirectResponse
     {
+        $this->authorize('bulkOperations', Client::class);
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:clients,id',
@@ -145,6 +165,8 @@ class ClientController extends Controller
 
     public function toggleStatus(Client $client): RedirectResponse
     {
+        $this->authorize('update', $client);
+
         $newStatus = $client->status === 'ativo' ? 'inativo' : 'ativo';
         $client->update(['status' => $newStatus]);
 
@@ -156,6 +178,8 @@ class ClientController extends Controller
 
     public function export(Request $request): Response
     {
+        $this->authorize('export', Client::class);
+
         $query = Client::query();
 
         // Apply same filters as index

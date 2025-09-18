@@ -6,7 +6,7 @@ use App\Models\Client;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ClientRequest extends FormRequest
+class ClientRequestNew extends FormRequest
 {
     public function authorize(): bool
     {
@@ -61,25 +61,26 @@ class ClientRequest extends FormRequest
             'phone' => [
                 'nullable',
                 'string',
-                'max:30',
-                'regex:/^[\(\)\d\s\-\+]+$/'
+                'max:20',
+                'regex:/^[0-9\s\(\)\-]+$/'
             ],
             'responsible' => [
                 'nullable',
                 'string',
                 'max:255',
-                'min:2'
+                'regex:/^[a-zA-ZÀ-ÿ\s\-\.]+$/'
             ],
             'responsible_email' => [
                 'nullable',
                 'email:rfc,dns',
-                'max:255'
+                'max:255',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
             ],
             'responsible_phone' => [
                 'nullable',
                 'string',
-                'max:30',
-                'regex:/^[\(\)\d\s\-\+]+$/'
+                'max:20',
+                'regex:/^[0-9\s\(\)\-]+$/'
             ],
             'state_registration' => [
                 'nullable',
@@ -94,8 +95,7 @@ class ClientRequest extends FormRequest
             'zip_code' => [
                 'nullable',
                 'string',
-                'max:10',
-                'regex:/^\d{5}-?\d{3}$/'
+                'regex:/^[0-9]{5}-?[0-9]{3}$/'
             ],
             'address' => [
                 'nullable',
@@ -105,12 +105,12 @@ class ClientRequest extends FormRequest
             'number' => [
                 'nullable',
                 'string',
-                'max:10'
+                'max:20'
             ],
             'complement' => [
                 'nullable',
                 'string',
-                'max:255'
+                'max:100'
             ],
             'neighborhood' => [
                 'nullable',
@@ -142,29 +142,6 @@ class ClientRequest extends FormRequest
                 'string',
                 'max:5000'
             ],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'O nome é obrigatório.',
-            'name.min' => 'O nome deve ter pelo menos 2 caracteres.',
-            'type.required' => 'O tipo de cliente é obrigatório.',
-            'type.in' => 'O tipo de cliente deve ser Pessoa Física ou Pessoa Jurídica.',
-            'document.required' => 'O documento (CPF/CNPJ) é obrigatório.',
-            'document.unique' => 'Este documento já está cadastrado.',
-            'email.email' => 'O e-mail deve ter um formato válido.',
-            'email.unique' => 'Este e-mail já está cadastrado.',
-            'phone.regex' => 'O telefone deve conter apenas números, espaços, parênteses e hífens.',
-            'responsible_email.email' => 'O e-mail do responsável deve ter um formato válido.',
-            'responsible_phone.regex' => 'O telefone do responsável deve conter apenas números, espaços, parênteses e hífens.',
-            'zip_code.regex' => 'O CEP deve ter o formato 00000-000.',
-            'state.size' => 'O estado deve ter exatamente 2 caracteres.',
-            'state.regex' => 'O estado deve conter apenas letras maiúsculas.',
-            'status.required' => 'O status é obrigatório.',
-            'status.in' => 'O status deve ser ativo ou inativo.',
-            'notes.max' => 'As notas não podem exceder 5000 caracteres.',
         ];
     }
 
@@ -233,42 +210,26 @@ class ClientRequest extends FormRequest
         
         return array_intersect_key($validated, array_flip($allowedFields));
     }
-}
-
-    /**
-     * Get validated data with additional security measures.
-     * Retorna dados validados com medidas de segurança adicionais
-     */
-    public function safeValidated(): array
-    {
-        $validated = $this->validated();
-        
-        // Remove qualquer campo que não deveria estar presente
-        $allowedFields = [
-            'name', 'type', 'document', 'email', 'phone', 'responsible',
-            'responsible_email', 'responsible_phone', 'state_registration',
-            'municipal_registration', 'zip_code', 'address', 'number',
-            'complement', 'neighborhood', 'city', 'state', 'country',
-            'status', 'notes'
-        ];
-        
-        return array_intersect_key($validated, array_flip($allowedFields));
-    }
 
     public function messages(): array
     {
         return [
             'name.required' => 'O nome é obrigatório.',
             'name.min' => 'O nome deve ter pelo menos 2 caracteres.',
+            'name.regex' => 'O nome deve conter apenas letras, espaços, hífens e pontos.',
             'type.required' => 'O tipo de cliente é obrigatório.',
             'type.in' => 'O tipo de cliente deve ser Pessoa Física ou Pessoa Jurídica.',
             'document.required' => 'O documento (CPF/CNPJ) é obrigatório.',
             'document.unique' => 'Este documento já está cadastrado.',
+            'document.regex' => 'O documento deve conter apenas números.',
             'email.email' => 'O e-mail deve ter um formato válido.',
             'email.unique' => 'Este e-mail já está cadastrado.',
-            'phone.regex' => 'O telefone deve conter apenas números, espaços, parênteses e hífens.',
+            'email.regex' => 'O formato do e-mail é inválido.',
+            'phone.regex' => 'O telefone deve conter apenas números.',
+            'responsible.regex' => 'O nome do responsável deve conter apenas letras, espaços, hífens e pontos.',
             'responsible_email.email' => 'O e-mail do responsável deve ter um formato válido.',
-            'responsible_phone.regex' => 'O telefone do responsável deve conter apenas números, espaços, parênteses e hífens.',
+            'responsible_email.regex' => 'O formato do e-mail do responsável é inválido.',
+            'responsible_phone.regex' => 'O telefone do responsável deve conter apenas números.',
             'zip_code.regex' => 'O CEP deve ter o formato 00000-000.',
             'state.size' => 'O estado deve ter exatamente 2 caracteres.',
             'state.regex' => 'O estado deve conter apenas letras maiúsculas.',
@@ -276,16 +237,5 @@ class ClientRequest extends FormRequest
             'status.in' => 'O status deve ser ativo ou inativo.',
             'notes.max' => 'As notas não podem exceder 5000 caracteres.',
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'document' => preg_replace('/\D/', '', $this->document ?? ''),
-            'phone' => $this->phone ? preg_replace('/[^\d\+]/', '', $this->phone) : null,
-            'responsible_phone' => $this->responsible_phone ? preg_replace('/[^\d\+]/', '', $this->responsible_phone) : null,
-            'zip_code' => $this->zip_code ? preg_replace('/\D/', '', $this->zip_code) : null,
-            'state' => $this->state ? strtoupper($this->state) : null,
-        ]);
     }
 }

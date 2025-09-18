@@ -16,6 +16,7 @@ class User extends Authenticatable
 
     /**
      * The attributes that are mass assignable.
+     * Limitado apenas aos campos seguros para mass assignment
      *
      * @var list<string>
      */
@@ -23,19 +24,32 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'avatar',
         'phone',
         'bio',
+        // Removido 'avatar' do fillable por segurança - deve ser atualizado separadamente
     ];
 
     /**
      * The attributes that should be hidden for serialization.
+     * Campos sensíveis que não devem aparecer em responses
      *
      * @var list<string>
      */
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The attributes that should be guarded against mass assignment.
+     * Campos críticos que nunca devem ser mass assigned
+     */
+    protected $guarded = [
+        'id',
+        'email_verified_at',
+        'avatar', // Avatar deve ser atualizado através de processo específico
+        'created_at',
+        'updated_at',
     ];
 
     /**
