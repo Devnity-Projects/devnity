@@ -15,6 +15,7 @@ interface AdminControls {
   targetDirectPermissions: string[]
   allPermissions: string[]
   permissionsMeta?: Record<string, { label: string; description: string }>
+  permissionGroups?: Array<{ key: string; label: string; permissions: string[] }>
 }
 
 interface Props {
@@ -35,6 +36,7 @@ const adminTargetPermsEffective = computed(() => props.admin?.targetPermissions 
 const adminTargetPermsDirect = computed(() => props.admin?.targetDirectPermissions ?? [])
 const allPerms = computed(() => props.admin?.allPermissions ?? [])
 const permMeta = computed(() => props.admin?.permissionsMeta ?? {})
+const permGroups = computed(() => props.admin?.permissionGroups ?? [])
 const isSelfSelected = computed(() => selectedAdminUserId.value === props.user.id)
 
 // Removidos: toggles próprios do usuário (permissões/roles)
@@ -191,24 +193,32 @@ const impersonateSelected = () => {
                 </div>
               </div>
 
-              <!-- Direct permissions for selected user -->
+              <!-- Direct permissions for selected user (grouped by sections) -->
               <div class="mt-8">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Permissões diretas do usuário</h3>
-                <div class="space-y-3" v-if="allPerms?.length">
-                  <div v-for="perm in allPerms" :key="perm" class="flex items-start justify-between">
-                    <div class="flex flex-col gap-1">
-                      <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ permMeta[perm]?.label || perm }}</span>
-                        <span v-if="adminTargetPermsEffective.includes(perm) && !adminTargetPermsDirect.includes(perm)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">Efetiva via role</span>
-                        <span v-else-if="adminTargetPermsEffective.includes(perm)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Ativa</span>
-                        <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">Inativa</span>
-                      </div>
-                      <p v-if="permMeta[perm]?.description" class="text-xs text-gray-500 dark:text-gray-400">{{ permMeta[perm]?.description }}</p>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Permissões diretas do usuário</h3>
+
+                <div class="space-y-6">
+                  <div v-for="grp in permGroups" :key="grp.key" class="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+                    <div class="px-4 py-2 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200">
+                      {{ grp.label }}
                     </div>
-                    <label v-if="can('manage users')" class="relative inline-flex items-center cursor-pointer mt-1">
-                      <input type="checkbox" class="sr-only peer" :checked="adminTargetPermsDirect.includes(perm)" @change="adminTogglePermission(perm)">
-                      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    </label>
+                    <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                      <div v-for="perm in grp.permissions" :key="perm" class="flex items-start justify-between px-4 py-3">
+                        <div class="flex flex-col gap-1">
+                          <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ permMeta[perm]?.label || perm }}</span>
+                            <span v-if="adminTargetPermsEffective.includes(perm) && !adminTargetPermsDirect.includes(perm)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">Efetiva via role</span>
+                            <span v-else-if="adminTargetPermsEffective.includes(perm)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Ativa</span>
+                            <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">Inativa</span>
+                          </div>
+                          <p v-if="permMeta[perm]?.description" class="text-xs text-gray-500 dark:text-gray-400">{{ permMeta[perm]?.description }}</p>
+                        </div>
+                        <label v-if="can('manage users')" class="relative inline-flex items-center cursor-pointer mt-1">
+                          <input type="checkbox" class="sr-only peer" :checked="adminTargetPermsDirect.includes(perm)" @change="adminTogglePermission(perm)">
+                          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

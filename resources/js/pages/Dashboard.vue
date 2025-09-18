@@ -31,7 +31,7 @@ const props = defineProps<{
 const currentTime = ref(new Date())
 const { can } = useAbility()
 const canCreateClient = computed(() => can('clients.create','clients.manage'))
-const canCreateProject = computed(() => can('manage projects'))
+const canCreateProject = computed(() => can('projects.create','projects.manage'))
 
 // Cards dos indicadores com o novo design
 const cards = [
@@ -238,7 +238,7 @@ onMounted(() => {
               <h3 class="font-semibold text-gray-900 dark:text-gray-100">Projetos Recentes</h3>
             </div>
             <Link 
-              v-if="can('manage projects')"
+              v-if="can('projects.view','projects.manage')"
               href="/projects" 
               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >
@@ -281,7 +281,7 @@ onMounted(() => {
               <h3 class="font-semibold text-gray-900 dark:text-gray-100">Tarefas Urgentes</h3>
             </div>
             <Link 
-              v-if="can('clients.view','clients.manage')"
+              v-if="can('tasks.view','tasks.manage')"
               href="/tasks?priority=urgent" 
               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >

@@ -70,10 +70,10 @@ const { can } = useAbility()
 const nav = [
   { label: 'Dashboard', href: '/dashboard', icon: Home, description: 'Visão geral do sistema' },
   { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos', perm: ['clients.view','clients.manage'] },
-  { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento', perm: ['manage projects'] },
-  { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos' },
-  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['manage finances'] },
-  { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte' },
+  { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento', perm: ['projects.view','projects.manage'] },
+  { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos', perm: ['tasks.view','tasks.manage'] },
+  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['financial.view','manage finances'] },
+  { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte', perm: ['support.admin','support.tickets.view'] },
 ]
 const permittedNav = computed(() => nav.filter((i: any) => !i.perm || can(...(Array.isArray(i.perm) ? i.perm : [i.perm]))))
 

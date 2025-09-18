@@ -188,6 +188,129 @@ class SettingsController extends Controller
             'clients.view_address' => ['label' => 'Clientes: ver endereço', 'description' => 'Exibe endereço completo.'],
             'clients.view_tax_info' => ['label' => 'Clientes: ver info fiscal', 'description' => 'Exibe dados fiscais (IE, regime, etc).'],
             'clients.view_notes' => ['label' => 'Clientes: ver anotações', 'description' => 'Exibe observações e notas internas.'],
+
+            // Projetos
+            'projects.view' => ['label' => 'Projetos: ver', 'description' => 'Pode listar e ver detalhes de projetos.'],
+            'projects.create' => ['label' => 'Projetos: criar', 'description' => 'Pode criar novos projetos.'],
+            'projects.update' => ['label' => 'Projetos: editar', 'description' => 'Pode editar projetos existentes.'],
+            'projects.delete' => ['label' => 'Projetos: apagar', 'description' => 'Pode remover projetos.'],
+            'projects.manage' => ['label' => 'Projetos: gerenciar (amplo)', 'description' => 'Acesso amplo ao módulo de projetos.'],
+            'projects.update_status' => ['label' => 'Projetos: alterar status', 'description' => 'Pode alterar o status de projetos.'],
+
+            // Tarefas
+            'tasks.view' => ['label' => 'Tarefas: ver', 'description' => 'Pode listar e ver detalhes de tarefas.'],
+            'tasks.create' => ['label' => 'Tarefas: criar', 'description' => 'Pode criar novas tarefas.'],
+            'tasks.update' => ['label' => 'Tarefas: editar', 'description' => 'Pode editar tarefas.'],
+            'tasks.delete' => ['label' => 'Tarefas: apagar', 'description' => 'Pode remover tarefas.'],
+            'tasks.manage' => ['label' => 'Tarefas: gerenciar (amplo)', 'description' => 'Acesso amplo ao módulo de tarefas.'],
+            'tasks.update_status' => ['label' => 'Tarefas: alterar status', 'description' => 'Pode alterar o status de tarefas.'],
+            'tasks.comments.add' => ['label' => 'Tarefas: adicionar comentário', 'description' => 'Pode adicionar comentários a tarefas.'],
+            'tasks.comments.delete' => ['label' => 'Tarefas: apagar comentário', 'description' => 'Pode remover comentários.'],
+            'tasks.attachments.upload' => ['label' => 'Tarefas: enviar anexo', 'description' => 'Pode enviar anexos.'],
+            'tasks.attachments.download' => ['label' => 'Tarefas: baixar anexo', 'description' => 'Pode baixar anexos.'],
+            'tasks.attachments.delete' => ['label' => 'Tarefas: apagar anexo', 'description' => 'Pode remover anexos.'],
+            'tasks.checklist.add' => ['label' => 'Tarefas: adicionar checklist', 'description' => 'Pode adicionar itens de checklist.'],
+            'tasks.checklist.update' => ['label' => 'Tarefas: editar checklist', 'description' => 'Pode editar itens de checklist.'],
+            'tasks.checklist.delete' => ['label' => 'Tarefas: apagar checklist', 'description' => 'Pode remover itens de checklist.'],
+
+            // Kanban
+            'kanban.view' => ['label' => 'Kanban: ver', 'description' => 'Pode acessar o quadro Kanban.'],
+            'kanban.update_status' => ['label' => 'Kanban: alterar status', 'description' => 'Pode alterar status de tarefas via Kanban.'],
+            'kanban.move' => ['label' => 'Kanban: mover cartões', 'description' => 'Pode mover cartões entre colunas.'],
+            'kanban.reorder' => ['label' => 'Kanban: reordenar cartões', 'description' => 'Pode reordenar a posição dos cartões.'],
+            'kanban.quick_create' => ['label' => 'Kanban: criação rápida', 'description' => 'Pode criar tarefas rapidamente pelo Kanban.'],
+
+            // Suporte
+            'support.admin' => ['label' => 'Suporte: admin', 'description' => 'Acessa a área administrativa do suporte.'],
+            'support.tickets.view' => ['label' => 'Suporte: ver tickets', 'description' => 'Pode listar e ver tickets.'],
+            'support.tickets.create' => ['label' => 'Suporte: criar ticket', 'description' => 'Pode abrir tickets.'],
+            'support.tickets.update' => ['label' => 'Suporte: editar ticket', 'description' => 'Pode editar tickets.'],
+            'support.tickets.delete' => ['label' => 'Suporte: apagar ticket', 'description' => 'Pode remover tickets.'],
+            'support.responses.create' => ['label' => 'Suporte: responder ticket', 'description' => 'Pode adicionar respostas a tickets.'],
+            'support.responses.delete' => ['label' => 'Suporte: apagar resposta', 'description' => 'Pode apagar respostas.'],
+            'support.categories.view' => ['label' => 'Suporte: ver categorias', 'description' => 'Pode listar categorias.'],
+            'support.categories.create' => ['label' => 'Suporte: criar categoria', 'description' => 'Pode criar categorias.'],
+            'support.categories.update' => ['label' => 'Suporte: editar categoria', 'description' => 'Pode editar categorias.'],
+            'support.categories.delete' => ['label' => 'Suporte: apagar categoria', 'description' => 'Pode remover categorias.'],
+
+            // Financeiro
+            'financial.view' => ['label' => 'Financeiro: ver dashboard', 'description' => 'Acessa o dashboard financeiro.'],
+            'financial.export' => ['label' => 'Financeiro: exportar', 'description' => 'Pode exportar dados financeiros.'],
+            'financial.categories.view' => ['label' => 'Financeiro: ver categorias', 'description' => 'Pode listar categorias financeiras.'],
+            'financial.categories.create' => ['label' => 'Financeiro: criar categoria', 'description' => 'Pode criar categorias financeiras.'],
+            'financial.categories.update' => ['label' => 'Financeiro: editar categoria', 'description' => 'Pode editar categorias financeiras.'],
+            'financial.categories.delete' => ['label' => 'Financeiro: apagar categoria', 'description' => 'Pode remover categorias financeiras.'],
+            'financial.categories.manage' => ['label' => 'Financeiro: gerenciar categorias (amplo)', 'description' => 'Acesso amplo às operações em massa/toggle de categorias.'],
+            'financial.transactions.view' => ['label' => 'Financeiro: ver transações', 'description' => 'Pode listar e ver transações financeiras.'],
+            'financial.transactions.create' => ['label' => 'Financeiro: criar transação', 'description' => 'Pode criar transações financeiras.'],
+            'financial.transactions.update' => ['label' => 'Financeiro: editar transação', 'description' => 'Pode editar transações financeiras.'],
+            'financial.transactions.delete' => ['label' => 'Financeiro: apagar transação', 'description' => 'Pode remover transações financeiras.'],
+            'financial.transactions.mark_paid' => ['label' => 'Financeiro: marcar como pago', 'description' => 'Pode marcar transações como pagas.'],
+            'financial.transactions.mark_pending' => ['label' => 'Financeiro: marcar como pendente', 'description' => 'Pode marcar transações como pendentes.'],
+            'financial.transactions.cancel' => ['label' => 'Financeiro: cancelar transação', 'description' => 'Pode cancelar transações.'],
+            'financial.transactions.manage' => ['label' => 'Financeiro: gerenciar transações (amplo)', 'description' => 'Acesso amplo às operações em massa de transações.'],
+        ];
+
+        // Grouping structure for UI sections
+        $groups = [
+            [
+                'key' => 'system',
+                'label' => 'Sistema',
+                'permissions' => [
+                    'manage users', 'view reports',
+                ],
+            ],
+            [
+                'key' => 'clients',
+                'label' => 'Clientes',
+                'permissions' => [
+                    'clients.view','clients.create','clients.update','clients.delete','clients.manage','clients.export',
+                    'clients.view_document','clients.view_contact','clients.view_address','clients.view_tax_info','clients.view_notes',
+                ],
+            ],
+            [
+                'key' => 'projects',
+                'label' => 'Projetos',
+                'permissions' => [
+                    'projects.view','projects.create','projects.update','projects.delete','projects.manage','projects.update_status',
+                ],
+            ],
+            [
+                'key' => 'tasks',
+                'label' => 'Tarefas',
+                'permissions' => [
+                    'tasks.view','tasks.create','tasks.update','tasks.delete','tasks.manage','tasks.update_status',
+                    'tasks.comments.add','tasks.comments.delete',
+                    'tasks.attachments.upload','tasks.attachments.download','tasks.attachments.delete',
+                    'tasks.checklist.add','tasks.checklist.update','tasks.checklist.delete',
+                ],
+            ],
+            [
+                'key' => 'kanban',
+                'label' => 'Kanban',
+                'permissions' => [
+                    'kanban.view','kanban.update_status','kanban.move','kanban.reorder','kanban.quick_create',
+                ],
+            ],
+            [
+                'key' => 'support',
+                'label' => 'Suporte',
+                'permissions' => [
+                    'support.admin',
+                    'support.tickets.view','support.tickets.create','support.tickets.update','support.tickets.delete',
+                    'support.responses.create','support.responses.delete',
+                    'support.categories.view','support.categories.create','support.categories.update','support.categories.delete',
+                ],
+            ],
+            [
+                'key' => 'financial',
+                'label' => 'Financeiro',
+                'permissions' => [
+                    'manage finances', 'financial.view', 'financial.export',
+                    'financial.categories.view','financial.categories.create','financial.categories.update','financial.categories.delete','financial.categories.manage',
+                    'financial.transactions.view','financial.transactions.create','financial.transactions.update','financial.transactions.delete','financial.transactions.mark_paid','financial.transactions.mark_pending','financial.transactions.cancel','financial.transactions.manage',
+                ],
+            ],
         ];
 
         $adminControls = null;
@@ -209,6 +332,7 @@ class SettingsController extends Controller
                 'targetDirectPermissions' => $target->getDirectPermissions()->pluck('name'),
                 'allPermissions' => $allPermissions,
                 'permissionsMeta' => $permMeta,
+                'permissionGroups' => $groups,
             ];
         }
 
