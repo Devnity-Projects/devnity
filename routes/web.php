@@ -107,8 +107,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', SupportCategoryController::class)->except(['show']);
     });
 
-    // Financial Routes with rate limiting for bulk operations
-    Route::prefix('financial')->name('financial.')->group(function () {
+    // Financial Routes (separate access control via permissions)
+    Route::prefix('financial')->name('financial.')->middleware('permission:financial.view|financial.manage')->group(function () {
         // Dashboard
         Route::get('/', [FinancialDashboardController::class, 'index'])->name('dashboard');
         

@@ -16,7 +16,8 @@ class ProjectController extends Controller
 {
     public function index(Request $request): InertiaResponse
     {
-        $query = Project::with(['client', 'tasks']);
+    // Carregar cliente com colunas mínimas; conte tasks sem carregar a coleção inteira
+    $query = Project::with(['client:id,name'])->withCount('tasks');
 
         // Search filter
         if ($request->filled('search')) {
@@ -70,14 +71,25 @@ class ProjectController extends Controller
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
             ],
-            'stats' => [
-                'total' => Project::count(),
-                'active' => Project::active()->count(),
-                'completed' => Project::completed()->count(),
-                'overdue' => Project::overdue()->count(),
-                'planning' => Project::byStatus(Project::STATUS_PLANNING)->count(),
-                'in_progress' => Project::byStatus(Project::STATUS_IN_PROGRESS)->count(),
-            ],
+            // Estatísticas agregadas em uma única consulta
+            'stats' => (function () {
+                $now = now();
+                $row = Project::selectRaw('COUNT(*) as total')
+                    ->selectRaw("SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as active", [Project::STATUS_PLANNING, Project::STATUS_IN_PROGRESS])
+                    ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed", [Project::STATUS_COMPLETED])
+                    ->selectRaw("SUM(CASE WHEN deadline < ? AND status NOT IN (?, ?) THEN 1 ELSE 0 END) as overdue", [$now, Project::STATUS_COMPLETED, Project::STATUS_CANCELLED])
+                    ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as planning", [Project::STATUS_PLANNING])
+                    ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as in_progress", [Project::STATUS_IN_PROGRESS])
+                    ->first();
+                return [
+                    'total' => (int) ($row->total ?? 0),
+                    'active' => (int) ($row->active ?? 0),
+                    'completed' => (int) ($row->completed ?? 0),
+                    'overdue' => (int) ($row->overdue ?? 0),
+                    'planning' => (int) ($row->planning ?? 0),
+                    'in_progress' => (int) ($row->in_progress ?? 0),
+                ];
+            })(),
             'statuses' => [
                 Project::STATUS_PLANNING => 'Planejamento',
                 Project::STATUS_IN_PROGRESS => 'Em Andamento',
@@ -136,16 +148,23 @@ class ProjectController extends Controller
 
     public function show(Project $project): InertiaResponse
     {
-        $project->load(['client', 'tasks']);
+        // Carregar apenas o necessário
+        $project->load(['client:id,name']);
+
+        // Em vez de trazer todas as tasks (potencialmente muitas), calcular estatísticas via consultas agregadas
+        $taskStats = [
+            'total' => $project->tasks()->count(),
+            'completed' => $project->tasks()->where('status', 'completed')->count(),
+            'in_progress' => $project->tasks()->where('status', 'in_progress')->count(),
+            'overdue' => $project->tasks()
+                ->where('due_date', '<', now())
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->count(),
+        ];
 
         return Inertia::render('Projects/Show', [
             'project' => $project,
-            'taskStats' => [
-                'total' => $project->tasks->count(),
-                'completed' => $project->tasks->where('status', 'completed')->count(),
-                'in_progress' => $project->tasks->where('status', 'in_progress')->count(),
-                'overdue' => $project->tasks->filter(fn($task) => $task->is_overdue ?? false)->count(),
-            ],
+            'taskStats' => $taskStats,
         ]);
     }
 

@@ -72,7 +72,7 @@ const nav = [
   { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos', perm: ['clients.view','clients.manage'] },
   { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento', perm: ['projects.view','projects.manage'] },
   { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos', perm: ['tasks.view','tasks.manage'] },
-  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['financial.view','manage finances'] },
+  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['financial.view','financial.manage'] },
   { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte', perm: ['support.admin','support.tickets.view'] },
 ]
 const permittedNav = computed(() => nav.filter((i: any) => !i.perm || can(...(Array.isArray(i.perm) ? i.perm : [i.perm]))))

@@ -15,7 +15,12 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Task::with(['project.client', 'assignedUser']);
+        $query = Task::query()->with([
+            // Load only the columns we actually need from related models
+            'project:id,name,client_id',
+            'project.client:id,name',
+            'assignedUser:id,name',
+        ]);
 
         // Filtros
         if ($request->has('status') && $request->status) {
@@ -46,25 +51,43 @@ class TaskController extends Controller
             $query->overdue();
         }
 
-        // Ordenação
+        // Ordenação (whitelist de colunas válidas para evitar SQL injection)
         $orderBy = $request->get('order_by', 'created_at');
         $direction = $request->get('direction', 'desc');
+        $allowedOrderColumns = ['created_at', 'updated_at', 'due_date', 'priority', 'status', 'title'];
+        if (!in_array($orderBy, $allowedOrderColumns, true)) {
+            $orderBy = 'created_at';
+        }
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
         $query->orderBy($orderBy, $direction);
 
-        $tasks = $query->paginate(15);
-        $projects = Project::with('client')->orderBy('name')->get();
-        $users = User::orderBy('name')->get();
+        $tasks = $query->paginate($request->integer('per_page', 15))->withQueryString();
+        $projects = Project::select('id', 'name', 'client_id')
+            ->with(['client:id,name'])
+            ->orderBy('name')
+            ->get();
+        $users = User::select('id', 'name')->orderBy('name')->get();
 
-        // Estatísticas das tarefas
+        // Estatísticas das tarefas (agregado em uma única query)
+        $now = now();
+        $statsRow = Task::selectRaw('COUNT(*) as total')
+            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as todo", [Task::STATUS_TODO])
+            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as in_progress", [Task::STATUS_IN_PROGRESS])
+            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as review", [Task::STATUS_REVIEW])
+            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed", [Task::STATUS_COMPLETED])
+            ->selectRaw(
+                "SUM(CASE WHEN due_date < ? AND status NOT IN (?, ?) THEN 1 ELSE 0 END) as overdue",
+                [$now, Task::STATUS_COMPLETED, Task::STATUS_CANCELLED]
+            )
+            ->first();
+
         $stats = [
-            'total' => Task::count(),
-            'todo' => Task::where('status', Task::STATUS_TODO)->count(),
-            'in_progress' => Task::where('status', Task::STATUS_IN_PROGRESS)->count(),
-            'review' => Task::where('status', Task::STATUS_REVIEW)->count(),
-            'completed' => Task::where('status', Task::STATUS_COMPLETED)->count(),
-            'overdue' => Task::where('due_date', '<', now())
-                          ->whereNotIn('status', [Task::STATUS_COMPLETED, Task::STATUS_CANCELLED])
-                          ->count(),
+            'total' => (int) ($statsRow->total ?? 0),
+            'todo' => (int) ($statsRow->todo ?? 0),
+            'in_progress' => (int) ($statsRow->in_progress ?? 0),
+            'review' => (int) ($statsRow->review ?? 0),
+            'completed' => (int) ($statsRow->completed ?? 0),
+            'overdue' => (int) ($statsRow->overdue ?? 0),
         ];
 
         return Inertia::render('Tasks/Index', [
@@ -101,10 +124,14 @@ class TaskController extends Controller
      */
     public function create(Request $request)
     {
-        $projects = Project::with('client')->orderBy('name')->get();
-        $users = User::orderBy('name')->get();
-        $selectedProject = $request->has('project_id') ? 
-            Project::find($request->project_id) : null;
+        $projects = Project::select('id', 'name', 'client_id')
+            ->with(['client:id,name'])
+            ->orderBy('name')
+            ->get();
+        $users = User::select('id', 'name')->orderBy('name')->get();
+        $selectedProject = $request->has('project_id')
+            ? Project::select('id', 'name', 'client_id')->with(['client:id,name'])->find($request->project_id)
+            : null;
 
         return Inertia::render('Tasks/Create', [
             'projects' => $projects,
@@ -173,12 +200,13 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $task->load([
-            'project.client',
-            'assignedUser',
-            'comments.user',
-            'attachments.user',
-            'checklist.assignedTo',
-            'activities.user'
+            'project:id,name,client_id',
+            'project.client:id,name',
+            'assignedUser:id,name',
+            'comments.user:id,name',
+            'attachments.user:id,name',
+            'checklist.assignedTo:id,name',
+            'activities.user:id,name',
         ]);
 
         return Inertia::render('Tasks/ShowAdvanced', [
@@ -191,8 +219,11 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        $projects = Project::with('client')->orderBy('name')->get();
-        $users = User::orderBy('name')->get();
+        $projects = Project::select('id', 'name', 'client_id')
+            ->with(['client:id,name'])
+            ->orderBy('name')
+            ->get();
+        $users = User::select('id', 'name')->orderBy('name')->get();
 
         return Inertia::render('Tasks/Edit', [
             'task' => $task,
@@ -298,7 +329,11 @@ class TaskController extends Controller
      */
     public function kanban(Request $request)
     {
-        $query = Task::with(['project.client', 'assignedUser']);
+        $query = Task::with([
+            'project:id,name,client_id',
+            'project.client:id,name',
+            'assignedUser:id,name',
+        ]);
 
         if ($request->has('project_id') && $request->project_id) {
             $query->where('project_id', $request->project_id);
@@ -314,8 +349,11 @@ class TaskController extends Controller
 
         $tasks = $query->get()->groupBy('status');
 
-        $projects = Project::with('client')->orderBy('name')->get();
-        $users = User::orderBy('name')->get();
+        $projects = Project::select('id', 'name', 'client_id')
+            ->with(['client:id,name'])
+            ->orderBy('name')
+            ->get();
+        $users = User::select('id', 'name')->orderBy('name')->get();
 
         return Inertia::render('Tasks/Kanban', [
             'tasksByStatus' => $tasks,

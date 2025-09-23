@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useAbility } from '@/composables/useAbility'
 import { 
   Plus, 
   Filter, 
@@ -88,6 +89,9 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+// Ability
+const { can } = useAbility()
+const canManageFinance = computed(() => can('financial.manage'))
 
 // Reactive data
 const showFilters = ref(false)
@@ -274,6 +278,7 @@ const formatDate = (date: string) => {
             </button>
 
             <button
+              v-if="canManageFinance"
               @click="router.visit(route('financial.transactions.create'))"
               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -478,7 +483,7 @@ const formatDate = (date: string) => {
         </div>
 
         <!-- Bulk Actions -->
-        <div v-if="showBulkActions" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+  <div v-if="showBulkActions && canManageFinance" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
           <div class="flex items-center justify-between">
             <p class="text-blue-800 dark:text-blue-200">
               {{ selectedTransactions.length }} transações selecionadas
@@ -639,7 +644,7 @@ const formatDate = (date: string) => {
                         <Eye class="h-4 w-4" />
                       </button>
 
-                      <button
+                      <button v-if="canManageFinance"
                         @click="router.visit(route('financial.transactions.edit', transaction.id))"
                         class="p-1.5 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                         title="Editar"
@@ -647,7 +652,7 @@ const formatDate = (date: string) => {
                         <Edit class="h-4 w-4" />
                       </button>
 
-                      <button
+                      <button v-if="canManageFinance"
                         @click="deleteTransaction(transaction)"
                         class="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                         title="Excluir"
