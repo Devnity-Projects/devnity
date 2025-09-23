@@ -211,7 +211,7 @@ onMounted(() => {
           >
             <Search class="h-4 w-4" />
             <span class="hidden lg:inline">Buscar...</span>
-            <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 border border-gray-200 dark:border-gray-600 rounded text-xs">⌘K</kbd>
+            <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 border border-gray-200 dark:border-gray-600 rounded text-xs">⌘+K</kbd>
           </button>
 
           <!-- Mobile Search -->
