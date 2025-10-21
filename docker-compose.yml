@@ -10,11 +10,11 @@ services:
       - "8002:80"
     volumes:
       - .:/var/www/html
-      # Monta a pasta compartilhada do Deployer para que symlinks relativos (storage, cache) funcionem dentro do container
-      - ../shared:/var/www/shared
+      # Monta a pasta compartilhada do Deployer com caminho absoluto para funcionar em qualquer contexto
+      - /var/www/devnity/shared:/var/www/shared
       # Sobrepõe os symlinks com bind mounts diretos para garantir que Laravel enxergue storage e cache
-      - ../shared/storage:/var/www/html/storage
-      - ../shared/bootstrap/cache:/var/www/html/bootstrap/cache
+      - /var/www/devnity/shared/storage:/var/www/html/storage
+      - /var/www/devnity/shared/bootstrap/cache:/var/www/html/bootstrap/cache
     networks:
       # Conecta à sua rede principal já existente
       - rede_geral_existente
