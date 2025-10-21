@@ -142,10 +142,29 @@ task('seed:all', [
     'seed:roles',
 ]);
 
-desc('Cachear configurações Laravel');
+desc('Cachear configurações e rotas do Laravel (com fallback se container não estiver rodando)');
 task('artisan:cache', function () {
-    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan config:cache');
-    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan route:cache');
+    // Garante diretórios necessários no host (shared) antes de rodar no container
+    run('mkdir -p {{deploy_path}}/shared/storage/{app/public,framework/{cache/data,sessions,views},logs} {{deploy_path}}/shared/bootstrap/cache');
+
+    // Comandos a executar dentro do container (evita escrita em storage/logs durante o cache)
+    // Observação: definimos LOG_CHANNEL=stderr para não depender de /var/www/html/storage/logs
+    $cmd = 'export LOG_CHANNEL=stderr; \
+mkdir -p bootstrap/cache || true; \
+php artisan config:cache && \
+php artisan route:cache || { echo "[warn] route:cache falhou, executando route:clear"; php artisan route:clear; }';
+
+    $script = 'if [ -L {{deploy_path}}/current ]; then \
+        cd $(readlink -f {{deploy_path}}/current); \
+        if docker compose --project-name {{docker_project_name}} ps -q app | grep -q .; then \
+            docker compose --project-name {{docker_project_name}} exec -T app bash -lc ' . escapeshellarg($cmd) . '; \
+        else \
+            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app bash -lc ' . escapeshellarg($cmd) . '; \
+        fi; \
+    else \
+        echo "Nenhum release atual encontrado. Execute um deploy primeiro."; exit 1; \
+    fi';
+    run($script);
     // view:cache removido - causa erro "View path not found" com storage symlink
     // As views serão compiladas on-demand durante o primeiro acesso
 });
