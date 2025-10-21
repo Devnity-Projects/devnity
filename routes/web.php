@@ -89,13 +89,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', SupportCategoryController::class)->except(['show']);
     });
 
-<<<<<<< HEAD
-    // Financial Routes
-    Route::prefix('financial')->name('financial.')->group(function () {
-=======
     // Financial Routes (separate access control via permissions)
     Route::prefix('financial')->name('financial.')->middleware('permission:financial.view|financial.manage')->group(function () {
->>>>>>> 3909a186024cf86fb4c551c5406da2b1d303f5b1
         // Dashboard
         Route::get('/', [FinancialDashboardController::class, 'index'])->name('dashboard');
         Route::get('/export', [FinancialDashboardController::class, 'export'])->name('export');
