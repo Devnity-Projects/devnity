@@ -19,7 +19,8 @@ set('repository', 'git@github.com:Devnity-Projects/devnity.git');
 set('keep_releases', 3);
 set('writable_mode', 'chmod');
 set('writable_chmod_mode', '0775');
-set('use_relative_symlink', false);
+// Use symlinks relativos para que os links (ex: storage) funcionem dentro do container Docker
+set('use_relative_symlink', true);
 set('ssh_multiplexing', false);
 set('default_timeout', 3600); // Timeout padrão para comandos longos
 

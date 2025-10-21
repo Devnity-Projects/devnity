@@ -10,6 +10,8 @@ services:
       - "8002:80"
     volumes:
       - .:/var/www/html
+      # Monta a pasta compartilhada do Deployer para que symlinks relativos (storage, cache) funcionem dentro do container
+      - ../shared:/var/www/shared
     networks:
       # Conecta à sua rede principal já existente
       - rede_geral_existente
