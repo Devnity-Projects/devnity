@@ -351,6 +351,21 @@ task('status', function () {
     run('free -h');
 });
 
+// Inspecionar symlinks e estrutura do release atual
+desc('Inspecionar estrutura do release atual');
+task('inspect:current', function () {
+    run('[ -L {{deploy_path}}/current ] && echo Current -> $(readlink -f {{deploy_path}}/current) || echo "sem current"');
+    run('ls -la {{deploy_path}}/current');
+    run('ls -la {{deploy_path}}/shared');
+    run('readlink -f {{deploy_path}}/current/storage || echo "storage não encontrado"');
+});
+
+desc('Inspecionar storage dentro do container');
+task('inspect:container', function () {
+    $cmd = 'set -xe; ls -la /var/www/html; echo "--- storage ---"; ls -la /var/www/html/storage || true; echo "---- readlink storage ----"; readlink -f /var/www/html/storage || true; echo "---- shared exists? ----"; ls -la /var/www/shared || true;';
+    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app bash -lc '.escapeshellarg($cmd));
+});
+
 // ============================
 // HEALTH CHECKS
 // ============================
