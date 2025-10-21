@@ -27,7 +27,7 @@ interface Project {
   id: number
   name: string
   description: string | null
-  client: Client
+  client: Client | null
   status: string
   priority: string
   type: string
@@ -141,8 +141,11 @@ onUnmounted(() => {
             
             <div class="flex items-center gap-2 mt-1">
               <User class="h-4 w-4 text-gray-400" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">
+              <span v-if="project.client" class="text-sm text-gray-600 dark:text-gray-400">
                 {{ project.client.name }}
+              </span>
+              <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                Projeto Pessoal
               </span>
             </div>
           </div>

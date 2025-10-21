@@ -25,7 +25,7 @@ class ProjectRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:65535'],
-            'client_id' => ['required', 'exists:clients,id'],
+            'client_id' => ['nullable', 'exists:clients,id'],
             'status' => ['required', 'in:' . implode(',', [
                 Project::STATUS_PLANNING,
                 Project::STATUS_IN_PROGRESS,
@@ -92,7 +92,6 @@ class ProjectRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'client_id.required' => 'O campo cliente é obrigatório.',
             'client_id.exists' => 'O cliente selecionado não existe.',
             'end_date.after_or_equal' => 'A data de fim deve ser posterior ou igual à data de início.',
             'budget.numeric' => 'O orçamento deve ser um valor numérico.',

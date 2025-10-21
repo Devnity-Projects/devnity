@@ -28,6 +28,7 @@ import GlobalSearch from '@/components/GlobalSearch.vue'
 import { useUserSettings } from '@/composables/useUserSettings'
 import { router, usePage as useInertiaPage } from '@inertiajs/vue3'
 import { useAbility } from '@/composables/useAbility'
+import { useAnalytics } from '@/composables/useAnalytics'
 
 const { user, isDarkTheme, applyTheme, toggleTheme, setupSystemThemeListener } = useUserSettings()
 const inertiaPage = useInertiaPage()
@@ -47,6 +48,9 @@ const openSearch = () => {
 // Use the theme toggle from the composable
 const toggleDark = toggleTheme
 
+// Google Analytics
+const { initTracking } = useAnalytics()
+
 // Setup theme management
 let cleanupSystemListener: (() => void) | null = null
 
@@ -56,6 +60,9 @@ onMounted(() => {
   
   // Setup system theme change listener
   cleanupSystemListener = setupSystemThemeListener()
+  
+  // Initialize Google Analytics tracking
+  initTracking()
 })
 
 onUnmounted(() => {

@@ -53,7 +53,7 @@ const errors = ref<Record<string, string>>({})
 const newTechnology = ref('')
 
 const isFormValid = computed(() => {
-  return form.value.name && form.value.client_id && form.value.status && form.value.priority && form.value.type
+  return form.value.name && form.value.status && form.value.priority && form.value.type
 })
 
 function addTechnology() {
@@ -132,14 +132,14 @@ function goBack() {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Cliente *
+                Cliente
+                <span class="text-xs text-gray-500 ml-1">(opcional para projetos pessoais)</span>
               </label>
               <select
                 v-model="form.client_id"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
               >
-                <option value="">Selecione um cliente</option>
+                <option value="">Projeto Pessoal (sem cliente)</option>
                 <option v-for="client in props.clients" :key="client.id" :value="client.id">
                   {{ client.name }}
                 </option>

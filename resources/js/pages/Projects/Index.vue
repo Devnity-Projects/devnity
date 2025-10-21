@@ -27,7 +27,7 @@ interface Project {
   id: number
   name: string
   description: string | null
-  client: Client
+  client: Client | null
   status: string
   priority: string
   type: string
@@ -295,6 +295,7 @@ function confirmDelete() {
                 class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
               >
                 <option value="">Todos</option>
+                <option value="personal">Projetos Pessoais</option>
                 <option v-for="client in props.clients" :key="client.id" :value="client.id.toString()">
                   {{ client.name }}
                 </option>

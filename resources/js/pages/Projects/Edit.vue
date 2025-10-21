@@ -149,13 +149,15 @@ function goBack() {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cliente *</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Cliente
+                <span class="text-xs text-gray-500 ml-1">(opcional para projetos pessoais)</span>
+              </label>
               <select
                 v-model="form.client_id"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
               >
-                <option value="">Selecione um cliente</option>
+                <option value="">Projeto Pessoal (sem cliente)</option>
                 <option v-for="client in props.clients" :key="client.id" :value="client.id">{{ client.name }}</option>
               </select>
               <p v-if="errors.client_id" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.client_id }}</p>

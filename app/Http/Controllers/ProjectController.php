@@ -39,7 +39,11 @@ class ProjectController extends Controller
 
         // Client filter
         if ($request->filled('client_id')) {
-            $query->where('client_id', $request->client_id);
+            if ($request->client_id === 'personal') {
+                $query->personal();
+            } else {
+                $query->where('client_id', $request->client_id);
+            }
         }
 
         // Type filter

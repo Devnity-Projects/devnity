@@ -104,6 +104,16 @@ class Project extends Model
             ->whereNotIn('status', [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
     }
 
+    public function scopePersonal(Builder $query): Builder
+    {
+        return $query->whereNull('client_id');
+    }
+
+    public function scopeWithClient(Builder $query): Builder
+    {
+        return $query->whereNotNull('client_id');
+    }
+
     // Métodos auxiliares
     public function isActive(): bool
     {
@@ -118,6 +128,11 @@ class Project extends Model
     public function isOverdue(): bool
     {
         return $this->deadline < now() && !$this->isCompleted();
+    }
+
+    public function isPersonal(): bool
+    {
+        return is_null($this->client_id);
     }
 
     public function getStatusLabelAttribute(): string
