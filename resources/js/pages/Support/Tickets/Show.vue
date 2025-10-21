@@ -255,7 +255,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const props = defineProps({
     ticket: Object,

@@ -137,7 +137,7 @@
 
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AppLayout.vue'
+import AuthenticatedLayout from '@/layouts/AppLayout.vue'
 
 const form = useForm({
     name: '',

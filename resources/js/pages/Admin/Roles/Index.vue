@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Link, usePage } from '@inertiajs/vue3'
 
 const props: any = usePage().props.value

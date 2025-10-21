@@ -222,8 +222,8 @@ task('maintenance:on', function () {
 desc('Modo manutenção OFF');
 task('maintenance:off', function () {
     run('[ -L {{deploy_path}}/current ] && cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan up || true');
-    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan config:cache');
-    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan route:cache');
+    run('[ -L {{deploy_path}}/current ] && cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan config:cache || true');
+    run('[ -L {{deploy_path}}/current ] && cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan route:cache || true');
     // view:cache removido - causa erro "View path not found" com storage symlink
 });
 // ==========================================
@@ -314,6 +314,20 @@ before('deploy', function () {
     info('📦 Branch: {{branch}}');
     info('📂 Path: {{deploy_path}}');
 });
+
+// ==========================================
+// HARDEN: GARANTIR DIRETÓRIOS ANTES DO LOCK
+// ==========================================
+// Em alguns ambientes o deploy:setup pode não criar .dep por permissão/ausência do caminho base.
+// Garantimos a estrutura mínima antes de executar o deploy:lock para evitar "No such file or directory".
+desc('Garantir diretórios base (.dep, releases, shared)');
+task('ensure:base_dirs', function () {
+    run('sudo mkdir -p {{deploy_path}} {{deploy_path}}/.dep {{deploy_path}}/releases {{deploy_path}}/shared');
+    // Garante que o usuário remoto tenha posse do diretório base do deploy
+    run('sudo chown -R {{remote_user}}:{{remote_user}} {{deploy_path}}');
+});
+
+before('deploy:lock', 'ensure:base_dirs');
 
 // ==========================================
 // TASKS AUXILIARES

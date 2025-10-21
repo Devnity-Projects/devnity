@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { router } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 interface User {
   id: number

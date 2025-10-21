@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useForm, router, Link } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { ArrowLeft, Save, UserPlus, Search, Loader2 } from 'lucide-vue-next'
 
 const form = useForm({
