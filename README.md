@@ -23,51 +23,108 @@ npm run dev
 php artisan serve
 ```
 
-## 🚀 Deploy com Deployer
+## 🚀 Deploy Automático
 
-### Configurar Servidor (uma vez)
+Este projeto utiliza **Deployer PHP** para deploy automatizado com Docker.
 
-```bash
-# No servidor
-mkdir -p /var/www/devnity/shared
-cd /var/www/devnity/shared
-nano .env  # Configure as variáveis de produção
-```
-
-### Configurar Secrets no GitHub
-
-`Settings` → `Secrets` → `Actions`:
-
-- `SSH_PRIVATE_KEY` - Chave privada SSH
-- `DEPLOY_HOST` - IP/domínio do servidor
-- `DEPLOY_USER` - Usuário SSH (ex: deploy)
-- `DEPLOY_PATH` - Caminho no servidor (ex: /var/www/devnity)
-
-### Deploy
+### 📦 Comandos Rápidos
 
 ```bash
-# Automático: push para main
-git push origin main
+# Windows PowerShell
+.\deploy.ps1 deploy production          # Deploy completo
+.\deploy.ps1 deploy:quick production    # Deploy rápido
+.\deploy.ps1 rollback production        # Reverter deploy
+.\deploy.ps1 status production          # Ver status
 
-# Manual: do seu computador
-vendor/bin/dep deploy production
+# Linux/Mac
+./deploy.sh deploy production           # Deploy completo
+./deploy.sh rollback production         # Reverter deploy
+
+# Usando Deployer diretamente
+vendor/bin/dep deploy production        # Deploy
+vendor/bin/dep rollback production      # Rollback
+vendor/bin/dep status production        # Status
+vendor/bin/dep logs production          # Ver logs
+
+# Usando Make (Linux/Mac)
+make deploy ENV=production              # Deploy
+make rollback ENV=production            # Rollback
+make status ENV=production              # Status
 ```
+
+### 📚 Documentação Completa
+
+- **[DEPLOY-QUICK.md](./DEPLOY-QUICK.md)** - Guia rápido com comandos essenciais
+- **[DEPLOY.md](./DEPLOY.md)** - Documentação completa de deploy
+
+### ⚙️ Configuração Inicial
+
+1. **Configure os hosts** no arquivo `deploy.php`:
+   ```php
+   host('production')->set('hostname', 'SEU_IP')
+   ```
+
+2. **Configure SSH** no seu computador:
+   ```bash
+   ssh-keygen -t ed25519
+   ssh-copy-id deploy@seu-servidor.com
+   ```
+
+3. **Inicialize o servidor**:
+   ```bash
+   vendor/bin/dep server:init production
+   vendor/bin/dep config:check production
+   ```
+
+4. **Configure .env** no servidor:
+   ```bash
+   scp .env.production.example deploy@servidor:/var/www/devnity/shared/.env
+   ssh deploy@servidor
+   nano /var/www/devnity/shared/.env
+   ```
+
+5. **Primeiro deploy**:
+   ```bash
+   vendor/bin/dep deploy production
+   ```
 
 ## 🛠️ Tecnologias
 
-- Laravel 11 + Vue 3 + TypeScript
-- Tailwind CSS 4 + Inertia.js
-- Docker + Nginx + Supervisor
-- Deployer PHP
+- **Backend:** Laravel 12 + PHP 8.2+
+- **Frontend:** Vue 3 + TypeScript + Inertia.js
+- **Styling:** Tailwind CSS 4
+- **Infraestrutura:** Docker + Nginx + Supervisor
+- **Deploy:** Deployer PHP 7.5+
+- **Autenticação:** Laravel Fortify
+- **Permissões:** Spatie Laravel Permission
 
-## 📝 Comandos Úteis
+## 📝 Comandos de Deploy
+
+| Comando | Descrição |
+|---------|-----------|
+| `deploy` | Deploy completo (build + assets) |
+| `deploy:quick` | Deploy rápido (sem build) |
+| `deploy:safe` | Deploy com modo manutenção |
+| `rollback` | Reverter para versão anterior |
+| `status` | Ver status do sistema |
+| `logs` | Ver logs da aplicação |
+| `maintenance:on` | Ativar modo manutenção |
+| `maintenance:off` | Desativar modo manutenção |
+
+### 🔧 Comandos Auxiliares
 
 ```bash
-# Ver releases no servidor
-vendor/bin/dep releases production
+# Verificar configuração
+vendor/bin/dep config:check production
 
-# Rollback (voltar para versão anterior)
-vendor/bin/dep rollback production
+# Ver status dos containers
+vendor/bin/dep docker:status production
+
+# Limpar caches
+vendor/bin/dep artisan:clear production
+
+# Reiniciar queue
+vendor/bin/dep queue:restart production
 
 # SSH no servidor
 vendor/bin/dep ssh production

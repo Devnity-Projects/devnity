@@ -7,7 +7,7 @@ require 'recipe/laravel.php';
 // CONFIGURAções GERAIS
 // ==========================================
 
-set('application', 'Gestao-Documentos');
+set('application', 'Devnity');
 set('docker_project_name', function () {
     // Sanitiza o nome da aplicação para ser usado como nome do projeto Docker.
     $name = get('application');
@@ -15,30 +15,26 @@ set('docker_project_name', function () {
     $name = preg_replace('/[^a-z0-9]/', '', $name); // Remove caracteres não alfanuméricos
     return $name;
 });
-set('repository', 'git@github.com:Prefeitura-Municipal-de-Lagoa-Santa/lagoa-ged.git');
+set('repository', 'git@github.com:Devnity-Projects/devnity.git');
 set('keep_releases', 3);
 set('writable_mode', 'chmod');
 set('writable_chmod_mode', '0775');
 set('use_relative_symlink', false);
 set('ssh_multiplexing', false);
+set('default_timeout', 3600); // Timeout padrão para comandos longos
 
 // ==========================================
 // CONFIGURAÇÃO DO SERVIDOR
 // ==========================================
 
 host('production')
-    ->set('remote_user', 'deploy')
-    ->set('hostname', '10.1.7.76')
+    ->set('remote_user', 'deployer')
+    ->set('hostname', '173.249.1.40') // Altere para o IP do servidor de produção
     ->set('port', 22)
-    ->set('deploy_path', '/var/www/lagoaged-dep')
-    ->set('branch', 'main');
+    ->set('deploy_path', '/var/www/devnity')
+    ->set('branch', 'main')
+    ->set('labels', ['stage' => 'production']);
 
-host('develop')
-    ->set('remote_user', 'deploy')
-    ->set('hostname', '10.1.7.75')
-    ->set('port', 22)
-    ->set('deploy_path', '/var/www/lagoaged')
-    ->set('branch', 'develop');
 
 // ==========================================
 // ARQUIVOS E PASTAS COMPARTILHADAS
@@ -64,16 +60,19 @@ task('docker:down', function () {
 
 desc('Build da imagem Docker');
 task('docker:build', function () {
-    run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} build', ['timeout' => 3600]);
+    info('🐳 Construindo imagem Docker...');
+    run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} build --no-cache', ['timeout' => 3600]);
 });
 
 desc('Instalar dependências Node.js');
 task('npm:install', function () {
+    info('📦 Instalando dependências Node.js...');
     run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app npm ci', ['timeout' => 1800]);
 });
 
 desc('Compilar assets com Vite');
 task('npm:build', function () {
+    info('⚡ Compilando assets com Vite...');
     run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app npm run build', ['timeout' => 1800]);
 });
 
@@ -249,6 +248,7 @@ task('deploy', [
 
 // Sobrescreve o deploy:vendors para executar dentro do container Docker
 task('deploy:vendors', function () {
+    info('📚 Instalando dependências PHP com Composer...');
     run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html -e COMPOSER_ALLOW_SUPERUSER=1 app composer install --verbose --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader', ['timeout' => 1800]);
 })->desc('Instalar vendors com Composer dentro do Docker');
 
@@ -297,14 +297,22 @@ task('rollback', [
 
 after('deploy:failed', function () {
     warning('❌ Deploy falhou!');
-    warning('Execute "dep rollback {{hostname}}" para reverter.');
+    warning('Execute "vendor/bin/dep rollback {{hostname}}" para reverter.');
     invoke('maintenance:off');
 });
 
 after('deploy:success', function () {
     info('✅ Deploy concluído com sucesso!');
     info('🌐 Sua aplicação está online!');
+    info('🔗 URL: ' . get('app_url', 'http://seu-servidor.com'));
     invoke('docker:cleanup');
+});
+
+// Adicionar verificação antes do deploy
+before('deploy', function () {
+    info('🚀 Iniciando deploy de {{application}} para {{hostname}}');
+    info('📦 Branch: {{branch}}');
+    info('📂 Path: {{deploy_path}}');
 });
 
 // ==========================================
@@ -371,4 +379,48 @@ task('proxy:nginx:errors', function () {
 desc('Health: HOST com fallback (curl/wget)');
 task('health:host2', function () {
     run('(command -v curl >/dev/null 2>&1 && curl -sS -I http://127.0.0.1:8006 | sed -n "1,20p") || (command -v wget >/dev/null 2>&1 && wget -S --spider http://127.0.0.1:8006 2>&1 | sed -n "1,20p") || echo "Nem curl nem wget disponíveis"');
+});
+
+// ============================
+// VERIFICAÇÃO DE CONFIGURAÇÃO
+// ============================
+desc('Verificar configuração do deploy');
+task('config:check', function () {
+    info('🔍 Verificando configuração...');
+    info('Application: {{application}}');
+    info('Repository: {{repository}}');
+    info('Branch: {{branch}}');
+    info('Deploy Path: {{deploy_path}}');
+    info('Remote User: {{remote_user}}');
+    info('Hostname: {{hostname}}');
+    info('Keep Releases: {{keep_releases}}');
+    
+    // Testar conexão SSH
+    info('🔌 Testando conexão SSH...');
+    run('echo "✅ Conexão SSH estabelecida com sucesso!"');
+    
+    // Verificar se Docker está instalado
+    info('🐳 Verificando Docker...');
+    run('docker --version');
+    run('docker compose version');
+    
+    // Verificar estrutura de diretórios
+    info('📂 Verificando estrutura de diretórios...');
+    run('ls -la {{deploy_path}} || echo "⚠️ Diretório de deploy não existe ainda (será criado no primeiro deploy)"');
+});
+
+desc('Configuração inicial do servidor');
+task('server:init', function () {
+    info('🚀 Configurando servidor inicial...');
+    
+    // Criar estrutura de diretórios
+    run('mkdir -p {{deploy_path}}/shared');
+    run('mkdir -p {{deploy_path}}/shared/storage/{app,framework,logs}');
+    run('mkdir -p {{deploy_path}}/shared/storage/framework/{cache,sessions,views}');
+    run('mkdir -p {{deploy_path}}/shared/bootstrap/cache');
+    
+    info('✅ Estrutura de diretórios criada!');
+    info('📝 Próximo passo: copie o arquivo .env para {{deploy_path}}/shared/.env');
+    info('Comando: scp .env.production.example {{remote_user}}@{{hostname}}:{{deploy_path}}/shared/.env');
+    info('Depois edite o arquivo no servidor e configure as variáveis de ambiente.');
 });
