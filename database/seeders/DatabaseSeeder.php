@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -18,23 +17,8 @@ class DatabaseSeeder extends Seeder
         // Rodar seeder de permissões/roles primeiro
         $this->call([
             PermissionSeeder::class,
+            AdminUserSeeder::class,
         ]);
-
-        // Criar/garantir usuário admin
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@devnity.com'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make('admin123'),
-                'email_verified_at' => now(),
-                'avatar' => null,
-                'phone' => '+55 11 99999-9999',
-                'bio' => 'Administrador do sistema Devnity',
-            ]
-        );
-
-        // Atribuir role admin
-        $admin->assignRole('admin');
 
         // Criar/garantir usuário de testes
         $test = User::firstOrCreate(
