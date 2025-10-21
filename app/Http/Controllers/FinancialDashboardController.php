@@ -12,6 +12,11 @@ use Carbon\Carbon;
 
 class FinancialDashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:financial.view|financial.manage')->only(['index']);
+        $this->middleware('permission:financial.manage')->only(['export']);
+    }
     public function index(Request $request): InertiaResponse
     {
         $period = $request->get('period', 'month'); // month, quarter, year

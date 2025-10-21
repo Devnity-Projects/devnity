@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useAbility } from '@/composables/useAbility'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -54,6 +55,8 @@ const selectedPeriod = ref(props.period)
 
 // Computed
 const isPositiveBalance = computed(() => props.stats.net_income >= 0)
+const { can } = useAbility()
+const canManageFinance = computed(() => can('financial.manage'))
 
 // Methods
 const changePeriod = (period: string) => {
@@ -114,6 +117,7 @@ const formatDate = (date: string) => {
             </select>
 
             <button
+              v-if="canManageFinance"
               @click="exportData"
               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -122,6 +126,7 @@ const formatDate = (date: string) => {
             </button>
 
             <button
+              v-if="canManageFinance"
               @click="router.visit(route('financial.transactions.create'))"
               class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >

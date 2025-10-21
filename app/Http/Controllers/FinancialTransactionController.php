@@ -17,6 +17,14 @@ use Carbon\Carbon;
 
 class FinancialTransactionController extends Controller
 {
+    public function __construct()
+    {
+        // Require manage permission for write actions; view-only for index/show
+        $this->middleware('permission:financial.manage')->only([
+            'create', 'store', 'edit', 'update', 'destroy', 'markAsPaid', 'markAsPending', 'cancel', 'bulkDestroy', 'bulkUpdateStatus'
+        ]);
+        $this->middleware('permission:financial.view|financial.manage')->only(['index', 'show']);
+    }
     public function index(Request $request): InertiaResponse
     {
         $query = FinancialTransaction::with(['category', 'client', 'project']);

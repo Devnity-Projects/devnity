@@ -13,6 +13,11 @@ use Inertia\Response as InertiaResponse;
 
 class FinancialCategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:financial.view|financial.manage')->only(['index', 'show', 'create']);
+        $this->middleware('permission:financial.manage')->only(['store', 'edit', 'update', 'destroy', 'toggleStatus', 'bulkDestroy', 'bulkToggleStatus']);
+    }
     public function index(Request $request): InertiaResponse
     {
         $query = FinancialCategory::query();

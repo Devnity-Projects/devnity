@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useAbility } from '@/composables/useAbility'
 import { 
   Plus, 
   Search, 
@@ -62,6 +63,9 @@ interface Props {
 const props = defineProps<Props>()
 
 // Reactive data
+// Ability
+const { can } = useAbility()
+const canManageFinance = computed(() => can('financial.manage'))
 const showFilters = ref(false)
 const selectedCategories = ref<number[]>([])
 const showBulkActions = ref(false)
@@ -217,7 +221,7 @@ const formatCurrency = (value: number) => {
               Filtros
             </button>
 
-            <button
+            <button v-if="canManageFinance"
               @click="router.visit(route('financial.categories.create'))"
               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -299,7 +303,7 @@ const formatCurrency = (value: number) => {
         </div>
 
         <!-- Bulk Actions -->
-        <div v-if="showBulkActions" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+  <div v-if="showBulkActions && canManageFinance" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
           <div class="flex items-center justify-between">
             <p class="text-blue-800 dark:text-blue-200">
               {{ selectedCategories.length }} categorias selecionadas
