@@ -136,7 +136,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+  <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
     <!-- Impersonation Banner -->
     <div v-if="isImpersonated" class="w-full bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 text-sm">
       <div class="container mx-auto max-w-screen-2xl px-4 sm:px-6 py-2 flex items-center justify-between">
@@ -367,7 +367,7 @@ onMounted(() => {
       </div>
 
     <!-- Main Content -->
-    <main class="container mx-auto max-w-screen-2xl px-4 sm:px-6 py-6">
+    <main class="flex-1 container mx-auto max-w-screen-2xl px-4 sm:px-6 py-6">
       <!-- Breadcrumb e Actions podem ser adicionados aqui -->
       <div class="devnity-animate-in">
         <slot />
@@ -378,7 +378,7 @@ onMounted(() => {
     <GlobalSearch ref="globalSearch" />
 
     <!-- Footer -->
-    <footer class="border-t bg-gray-50 dark:bg-gray-900/50 py-8 mt-auto">
+    <footer class="border-t bg-gray-50 dark:bg-gray-900/50 py-8">
       <div class="container mx-auto max-w-screen-2xl px-4 sm:px-6">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
           <div class="flex items-center gap-4">

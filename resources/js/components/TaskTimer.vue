@@ -153,13 +153,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center gap-4">
-    <!-- Tempo Total Trabalhado -->
-    <div v-if="totalHoursWorked > 0" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-      <Clock class="h-4 w-4" />
-      <span>Tempo total trabalhado: <strong class="text-gray-900 dark:text-white">{{ formattedTotalHours }}</strong></span>
-    </div>
-    
+  <div class="flex items-center gap-3">
     <!-- Timer Display -->
     <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
       <Clock class="h-4 w-4 text-gray-600 dark:text-gray-400" :class="{ 'text-green-600 animate-pulse': isRunning }" />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { 
@@ -36,6 +36,9 @@ const props = defineProps<Props>()
 
 const initialProjectId = props.selectedProject?.id || (Number(new URLSearchParams(window.location.search).get('project_id')) || '')
 
+const estimatedHours = ref(0)
+const estimatedMinutes = ref(0)
+
 const form = useForm({
   title: '',
   description: '',
@@ -49,6 +52,15 @@ const form = useForm({
   labels: [] as string[],
   acceptance_criteria: '',
   notes: ''
+})
+
+// Watch para converter horas e minutos em decimal
+watch([estimatedHours, estimatedMinutes], ([hours, minutes]) => {
+  if (hours === 0 && minutes === 0) {
+    form.hours_estimated = ''
+  } else {
+    form.hours_estimated = (hours + minutes / 60).toFixed(2)
+  }
 })
 
 const labelInput = reactive({ value: '' })
@@ -216,22 +228,34 @@ function removeLabel(index: number) {
 
               <!-- Hours Estimated -->
               <div>
-                <label for="hours_estimated" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Horas Estimadas
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tempo Estimado
                 </label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Clock class="h-5 w-5 text-gray-400" />
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Clock class="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      v-model.number="estimatedHours"
+                      type="number"
+                      min="0"
+                      placeholder="Horas"
+                      class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      :class="{ 'border-red-500': form.errors.hours_estimated }"
+                    />
                   </div>
-                  <input
-                    id="hours_estimated"
-                    v-model="form.hours_estimated"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    :class="{ 'border-red-500': form.errors.hours_estimated }"
-                  />
+                  <div class="relative">
+                    <input
+                      v-model.number="estimatedMinutes"
+                      type="number"
+                      min="0"
+                      max="59"
+                      placeholder="Minutos"
+                      class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      :class="{ 'border-red-500': form.errors.hours_estimated }"
+                    />
+                  </div>
                 </div>
                 <p v-if="form.errors.hours_estimated" class="mt-1 text-sm text-red-600 dark:text-red-400">
                   {{ form.errors.hours_estimated }}

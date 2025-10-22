@@ -199,6 +199,21 @@ const formatDate = (date: string): string => {
   }).format(new Date(date))
 }
 
+const formatHoursMinutes = (hours: number | null): string => {
+  if (!hours || hours === 0) return '0h'
+  
+  const h = Math.floor(hours)
+  const m = Math.round((hours - h) * 60)
+  
+  if (h > 0 && m > 0) {
+    return `${h}h ${m}m`
+  } else if (h > 0) {
+    return `${h}h`
+  } else {
+    return `${m}m`
+  }
+}
+
 const formatFileSize = (bytes: number): string => {
   const sizes = ['B', 'KB', 'MB', 'GB']
   if (bytes === 0) return '0 B'
@@ -472,18 +487,22 @@ const deleteComment = (comment: TaskComment) => {
                 </div>
 
                 <!-- Time Tracking -->
-                <div v-if="task.hours_estimated" class="mb-6">
+                <div v-if="task.hours_estimated || task.hours_worked" class="mb-6">
                   <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Tempo</h3>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
+                    <div v-if="task.hours_estimated">
                       <p class="text-sm text-gray-600 dark:text-gray-400">Estimado</p>
-                      <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ task.hours_estimated }}h</p>
+                      <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ formatHoursMinutes(task.hours_estimated) }}
+                      </p>
                     </div>
                     <div>
                       <p class="text-sm text-gray-600 dark:text-gray-400">Trabalhado</p>
-                      <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ task.time_spent }}</p>
+                      <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ formatHoursMinutes(task.hours_worked) }}
+                      </p>
                     </div>
-                    <div>
+                    <div v-if="task.hours_estimated">
                       <p class="text-sm text-gray-600 dark:text-gray-400">Progresso</p>
                       <div class="flex items-center gap-2">
                         <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
