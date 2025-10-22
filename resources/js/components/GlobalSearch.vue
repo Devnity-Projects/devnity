@@ -122,7 +122,7 @@
                   <div class="flex-1 min-w-0">
                     <div class="font-medium text-gray-900 dark:text-white truncate">{{ project.name }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      <span>{{ project.client.name }}</span>
+                      <span>{{ project.client?.name || 'Projeto Pessoal' }}</span>
                       <span v-if="project.description" class="ml-2">• {{ project.description }}</span>
                     </div>
                   </div>

@@ -437,7 +437,7 @@ function formatCurrency(value: number | null): string {
                 </h3>
                 <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
                   <Building class="h-4 w-4" />
-                  {{ project.client.name }}
+                  {{ project.client?.name || 'Projeto Pessoal' }}
                 </div>
               </div>
               

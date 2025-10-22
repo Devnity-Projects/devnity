@@ -46,7 +46,7 @@ interface Project {
   id: number
   name: string
   description: string | null
-  client: Client
+  client: Client | null
   status: string
   priority: string
   type: string
@@ -192,7 +192,7 @@ function goBack() {
                 <div class="flex items-center gap-2 mt-1">
                   <User class="h-4 w-4 text-gray-400" />
                   <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ project.client.name }}
+                    {{ project.client?.name || 'Projeto Pessoal' }}
                   </span>
                 </div>
               </div>
@@ -403,7 +403,7 @@ function goBack() {
               <div class="flex items-center justify-between">
                 <span class="text-gray-600 dark:text-gray-400">Cliente:</span>
                 <span class="font-medium text-gray-900 dark:text-gray-100">
-                  {{ project.client.name }}
+                  {{ project.client?.name || 'Projeto Pessoal' }}
                 </span>
               </div>
               
@@ -492,7 +492,7 @@ function goBack() {
       @close="showDeleteModal = false"
       @confirm="deleteProject"
       title="Excluir Projeto"
-      :message="`Tem certeza que deseja excluir o projeto '${project.name}'? Esta ação não pode ser desfeita.`"
+      :message="`Tem certeza que deseja excluir o projeto '${project?.name || 'este projeto'}'? Esta ação não pode ser desfeita.`"
       confirmText="Sim, excluir"
       cancelText="Cancelar"
       variant="danger"
