@@ -39,6 +39,14 @@ class Task extends Model
         'completed_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'status_label',
+        'priority_label',
+        'type_label',
+        'time_spent',
+        'is_overdue',
+    ];
+
     // Status constants
     public const STATUS_TODO = 'todo';
     public const STATUS_IN_PROGRESS = 'in_progress';
