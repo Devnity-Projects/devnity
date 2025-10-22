@@ -140,4 +140,20 @@ Route::middleware('auth')->group(function () {
         
         return response()->file($path);
     })->name('avatar.show');
+    
+    // Rotas de teste para páginas de erro (apenas em desenvolvimento)
+    if (config('app.debug')) {
+        Route::prefix('test-errors')->group(function () {
+            Route::get('/404', fn() => abort(404))->name('test.404');
+            Route::get('/500', fn() => abort(500))->name('test.500');
+            Route::get('/503', fn() => abort(503))->name('test.503');
+            Route::get('/403', fn() => abort(403))->name('test.403');
+            Route::get('/401', fn() => abort(401))->name('test.401');
+            Route::get('/maintenance', function() {
+                // Simular modo de manutenção
+                app()->make(\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class);
+                return abort(503);
+            })->name('test.maintenance');
+        });
+    }
 });

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro Interno - Devnity</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .number-500 {
+            font-size: 12rem;
+            line-height: 1;
+            background: linear-gradient(45deg, #fff, #e5e7eb);
+            -webkit-background-clip: text;
+            -webkit-text-stroke: 4px transparent;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .number-500 {
+                font-size: 8rem;
+            }
+        }
+        
+        .error-icon {
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center px-4">
+    <div class="text-center max-w-4xl mx-auto">
+        <!-- Main Content Container -->
+        <div class="glass-effect rounded-3xl p-8 md:p-12 shadow-2xl">
+            <!-- Error Icon -->
+            <div class="mb-8">
+                <div class="animate-float">
+                    <svg class="w-24 h-24 md:w-32 md:h-32 mx-auto text-white error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- 500 Number -->
+            <div class="mb-6">
+                <h1 class="number-500 font-black">500</h1>
+            </div>
+            
+            <!-- Title -->
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">
+                Erro Interno do Servidor
+            </h2>
+            
+            <!-- Description -->
+            <div class="bg-white/10 rounded-2xl p-6 mb-8 backdrop-blur-sm">
+                <p class="text-white/80 text-lg leading-relaxed mb-4">
+                    Oops! Algo deu errado em nossos servidores.
+                </p>
+                <p class="text-white/70 text-base">
+                    Nossa equipe foi notificada e está trabalhando para resolver o problema. 
+                    Tente novamente em alguns minutos.
+                </p>
+            </div>
+            
+            <!-- Error Details (only in development) -->
+            @if(config('app.debug') && isset($exception))
+                <div class="bg-red-500/20 border border-red-400/30 rounded-2xl p-6 mb-8 backdrop-blur-sm text-left">
+                    <h3 class="text-white font-medium text-lg mb-3 text-center">Detalhes do Erro (Desenvolvimento)</h3>
+                    <div class="bg-black/20 rounded-lg p-4 overflow-auto">
+                        <pre class="text-white/90 text-sm whitespace-pre-wrap">{{ $exception->getMessage() }}</pre>
+                        <div class="mt-2 text-white/60 text-xs">
+                            <strong>Arquivo:</strong> {{ $exception->getFile() }}<br>
+                            <strong>Linha:</strong> {{ $exception->getLine() }}
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <button onclick="window.location.reload()" class="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Tentar Novamente
+                </button>
+                
+                <a href="/" class="bg-transparent hover:bg-white/10 text-white/80 hover:text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 border border-white/30 hover:border-white/50">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Voltar ao Início
+                </a>
+            </div>
+            
+            <!-- Status Check -->
+            <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                <h3 class="text-white font-medium text-lg mb-4">Status do Sistema</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-center justify-center gap-2 p-3 bg-white/10 rounded-lg">
+                        <div class="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                        <span class="text-white/80 text-sm">Servidor</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-2 p-3 bg-white/10 rounded-lg">
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                        <span class="text-white/80 text-sm">Banco de Dados</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-2 p-3 bg-white/10 rounded-lg">
+                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <span class="text-white/80 text-sm">Monitoramento</span>
+                    </div>
+                </div>
+                <p class="text-white/60 text-sm mt-4">
+                    Nossa equipe está investigando e trabalhando na solução.
+                </p>
+            </div>
+            
+            <!-- Contact Support -->
+            <div class="mt-6 bg-white/5 rounded-xl p-4 border border-white/10">
+                <p class="text-white/70 text-sm mb-3">Precisa de ajuda urgente?</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="mailto:suporte@devnity.com.br" class="flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        suporte@devnity.com.br
+                    </a>
+                    <span class="text-white/40 hidden sm:block">•</span>
+                    <a href="tel:+5511999999999" class="flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        (11) 99999-9999
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <div class="flex items-center justify-center gap-2 text-white/60 text-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                </svg>
+                <span class="font-semibold">Devnity</span>
+                <span>•</span>
+                <span>Soluções em Desenvolvimento</span>
+            </div>
+            <p class="text-white/40 text-xs mt-2">
+                © {{ date('Y') }} Devnity. Todos os direitos reservados.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Auto-retry script -->
+    <script>
+        // Auto-retry a cada 60 segundos
+        let retryCounter = 60;
+        
+        function updateRetryCounter() {
+            const retryElement = document.getElementById('retry-counter');
+            if (retryElement) {
+                retryElement.textContent = retryCounter;
+            }
+            
+            if (retryCounter > 0) {
+                retryCounter--;
+                setTimeout(updateRetryCounter, 1000);
+            } else {
+                window.location.reload();
+            }
+        }
+        
+        // Adicionar contador de retry
+        const retryIndicator = document.createElement('div');
+        retryIndicator.className = 'fixed bottom-4 right-4 bg-black/20 text-white/60 px-3 py-2 rounded-lg text-xs backdrop-blur-sm';
+        retryIndicator.innerHTML = `Tentativa automática em <span id="retry-counter">${retryCounter}</span>s`;
+        document.body.appendChild(retryIndicator);
+        
+        updateRetryCounter();
+    </script>
+</body>
+</html>
