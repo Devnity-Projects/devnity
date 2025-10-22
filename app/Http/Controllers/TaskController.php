@@ -209,8 +209,25 @@ class TaskController extends Controller
             'activities.user:id,name',
         ]);
 
+        // Verificar se há timer ativo
+        $activeTimer = $task->getActiveTimer(auth()->id());
+        $timerStatus = [
+            'has_active_timer' => $activeTimer !== null,
+            'entry' => $activeTimer ? [
+                'id' => $activeTimer->id,
+                'started_at' => $activeTimer->started_at->toIso8601String(),
+                'elapsed_seconds' => $activeTimer->started_at->diffInSeconds(now()),
+            ] : null,
+            'total_hours_worked' => $task->hours_worked ?? 0,
+        ];
+
+        // Obter histórico de sessões do timer
+        $timerSessions = $task->getTimerSessions();
+
         return Inertia::render('Tasks/ShowAdvanced', [
             'task' => $task,
+            'timerStatus' => $timerStatus,
+            'timerSessions' => $timerSessions,
         ]);
     }
 

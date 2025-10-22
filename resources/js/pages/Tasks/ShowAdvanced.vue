@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
+import TaskTimer from '@/components/TaskTimer.vue'
 import {
   ArrowLeft,
   Calendar,
@@ -28,7 +29,8 @@ import {
   FileText,
   TestTube,
   Wrench,
-  AlertTriangle
+  AlertTriangle,
+  Timer
 } from 'lucide-vue-next'
 
 interface User {
@@ -109,13 +111,30 @@ interface Task {
   activities: TaskActivity[]
 }
 
+interface TimerStatus {
+  has_active_timer: boolean
+  entry?: {
+    id: number
+    started_at: string
+    elapsed_seconds: number
+  }
+  total_hours_worked?: number
+}
+
+interface TimerSession {
+  id: number
+  user: string
+  started_at: string
+  ended_at: string | null
+  duration: string
+  description: string | null
+  is_running: boolean
+}
+
 interface Props {
   task: Task
-  projects: Project[]
-  users: User[]
-  statuses: Record<string, string>
-  priorities: Record<string, string>
-  types: Record<string, string>
+  timerStatus?: TimerStatus
+  timerSessions?: TimerSession[]
 }
 
 const props = defineProps<Props>()
@@ -300,7 +319,13 @@ const deleteComment = (comment: TaskComment) => {
               </div>
             </div>
             
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
+              <!-- Task Timer -->
+              <TaskTimer 
+                :taskId="task.id" 
+                :initialStatus="timerStatus"
+              />
+              
               <button
                 @click="editTask"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -774,27 +799,78 @@ const deleteComment = (comment: TaskComment) => {
                   </button>
                 </div>
                 
-                <div :class="['space-y-3', showActivities ? '' : 'max-h-60 overflow-hidden']">
-                  <div
-                    v-for="activity in task.activities"
-                    :key="activity.id"
-                    class="flex items-start gap-3"
-                  >
-                    <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                      <Activity class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <div :class="['space-y-4', showActivities ? '' : 'max-h-96 overflow-y-auto']">
+                  <!-- Sessões do Timer -->
+                  <div v-if="timerSessions && timerSessions.length > 0" class="space-y-3">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                      <Timer class="h-4 w-4" />
+                      Sessões de Trabalho
+                    </h4>
+                    <div
+                      v-for="session in timerSessions"
+                      :key="session.id"
+                      class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                    >
+                      <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <Timer class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            {{ session.user }}
+                          </p>
+                          <span 
+                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                            :class="session.is_running 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'"
+                          >
+                            {{ session.duration }}
+                          </span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          <span v-if="session.is_running" class="text-green-600 dark:text-green-400 font-medium">
+                            ● Em andamento
+                          </span>
+                          <span v-else>
+                            {{ session.started_at }} → {{ session.ended_at }}
+                          </span>
+                        </p>
+                        <p v-if="session.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
+                          "{{ session.description }}"
+                        </p>
+                      </div>
                     </div>
-                    
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm text-gray-900 dark:text-white">
-                        <span class="font-medium">{{ activity.user.name }}</span>
-                        {{ activity.description }}
-                      </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(activity.created_at) }}</p>
+                  </div>
+
+                  <!-- Atividades da Task -->
+                  <div v-if="task.activities && task.activities.length > 0" class="space-y-3">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                      <Activity class="h-4 w-4" />
+                      Histórico de Alterações
+                    </h4>
+                    <div
+                      v-for="activity in task.activities"
+                      :key="activity.id"
+                      class="flex items-start gap-3"
+                    >
+                      <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <Activity class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      </div>
+                      
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900 dark:text-white">
+                          <span class="font-medium">{{ activity.user.name }}</span>
+                          {{ activity.description }}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(activity.created_at) }}</p>
+                      </div>
                     </div>
                   </div>
                   
-                  <div v-if="task.activities.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">
-                    <Activity class="h-6 w-6 mx-auto mb-2" />
+                  <div v-if="(!timerSessions || timerSessions.length === 0) && (!task.activities || task.activities.length === 0)" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Activity class="h-8 w-8 mx-auto mb-2" />
                     <p class="text-sm">Nenhuma atividade registrada</p>
                   </div>
                 </div>

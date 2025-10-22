@@ -183,9 +183,13 @@ class ProjectController extends Controller
                 ->count(),
         ];
 
+        // Calcular progresso baseado em tarefas
+        $progress = $project->task_based_progress;
+
         return Inertia::render('Projects/Show', [
             'project' => $project,
             'taskStats' => $taskStats,
+            'progress' => $progress,
         ]);
     }
 

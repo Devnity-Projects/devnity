@@ -90,6 +90,11 @@ class Task extends Model
         return $this->hasMany(\App\Models\TaskActivity::class);
     }
 
+    public function timeEntries(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TaskTimeEntry::class);
+    }
+
     // Scopes
     public function scopeByStatus(Builder $query, string $status): Builder
     {
@@ -230,5 +235,97 @@ class Task extends Model
             'status' => self::STATUS_COMPLETED,
             'completed_at' => now(),
         ]);
+    }
+
+    // Timer methods
+    /**
+     * Inicia um timer para a tarefa
+     */
+    public function startTimer(int $userId): TaskTimeEntry
+    {
+        // Parar qualquer timer ativo do usuário
+        $this->stopActiveTimer($userId);
+
+        // Criar nova entrada de tempo
+        $entry = $this->timeEntries()->create([
+            'user_id' => $userId,
+            'started_at' => now(),
+            'is_running' => true,
+        ]);
+
+        // Marcar tarefa como iniciada se ainda não estiver
+        if ($this->status === self::STATUS_TODO) {
+            $this->markAsStarted();
+        }
+
+        return $entry;
+    }
+
+    /**
+     * Para o timer ativo do usuário
+     */
+    public function stopActiveTimer(int $userId, ?string $description = null): ?TaskTimeEntry
+    {
+        $activeEntry = $this->timeEntries()
+            ->where('user_id', $userId)
+            ->where('is_running', true)
+            ->first();
+
+        if ($activeEntry) {
+            $activeEntry->stop($description);
+            return $activeEntry;
+        }
+
+        return null;
+    }
+
+    /**
+     * Retorna o timer ativo do usuário, se houver
+     */
+    public function getActiveTimer(int $userId): ?TaskTimeEntry
+    {
+        return $this->timeEntries()
+            ->where('user_id', $userId)
+            ->where('is_running', true)
+            ->first();
+    }
+
+    /**
+     * Atualiza as horas trabalhadas baseado nas entradas de tempo
+     */
+    public function updateWorkedHours(): void
+    {
+        $totalHours = $this->timeEntries()
+            ->where('is_running', false)
+            ->sum('duration_hours');
+
+        \Log::info("Atualizando horas trabalhadas da tarefa #{$this->id}: {$totalHours}h");
+
+        $this->update([
+            'hours_worked' => $totalHours,
+        ]);
+    }
+
+    /**
+     * Retorna todas as sessões de trabalho
+     */
+    public function getTimerSessions(): array
+    {
+        return $this->timeEntries()
+            ->with('user:id,name')
+            ->orderBy('started_at', 'desc')
+            ->get()
+            ->map(function ($entry) {
+                return [
+                    'id' => $entry->id,
+                    'user' => $entry->user?->name,
+                    'started_at' => $entry->started_at->format('d/m/Y H:i'),
+                    'ended_at' => $entry->ended_at?->format('d/m/Y H:i'),
+                    'duration' => $entry->formatted_duration,
+                    'description' => $entry->description,
+                    'is_running' => $entry->is_running,
+                ];
+            })
+            ->toArray();
     }
 }

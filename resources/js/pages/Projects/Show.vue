@@ -77,9 +77,24 @@ interface TaskStats {
   overdue: number
 }
 
+interface Progress {
+  tasks: {
+    total: number
+    completed: number
+    percentage: number
+  }
+  hours: {
+    estimated: number
+    worked: number
+    percentage: number
+  }
+  overall_percentage: number
+}
+
 interface Props {
   project: Project
   taskStats: TaskStats
+  progress?: Progress
 }
 
 const props = defineProps<Props>()
@@ -102,6 +117,12 @@ const priorityConfig: Record<string, { color: string, bg: string }> = {
 }
 
 const progressPercentage = computed(() => {
+  // Se temos dados de progresso calculados pelo backend, usar
+  if (props.progress) {
+    return props.progress.overall_percentage
+  }
+  
+  // Fallback para cálculo antigo
   if (!props.project.hours_estimated || props.project.hours_estimated === 0) {
     return 0
   }
@@ -289,14 +310,14 @@ function goBack() {
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Progresso
+                Progresso Geral
               </h2>
               <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {{ Math.round(progressPercentage) }}%
               </span>
             </div>
             
-            <div class="mb-4">
+            <div class="mb-6">
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div 
                   class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
@@ -305,7 +326,41 @@ function goBack() {
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <!-- Progresso por Tarefas -->
+            <div v-if="progress" class="space-y-4 mb-6">
+              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <ListTodo class="h-4 w-4 text-blue-500" />
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progresso por Tarefas</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {{ progress.tasks.completed }} / {{ progress.tasks.total }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ progress.tasks.percentage }}% concluído
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <Clock class="h-4 w-4 text-green-500" />
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progresso por Horas</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {{ progress.hours.worked }}h / {{ progress.hours.estimated }}h
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ progress.hours.percentage }}% trabalhado
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Horas do Projeto (Fallback) -->
+            <div v-else class="grid grid-cols-2 gap-4 text-sm">
               <div class="flex items-center justify-between">
                 <span class="text-gray-600 dark:text-gray-400">Horas Trabalhadas:</span>
                 <span class="font-medium text-gray-900 dark:text-gray-100">

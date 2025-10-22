@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use App\Models\Task;
+use App\Observers\TaskObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
             // Força o uso de HTTPS em URLs geradas pelo Laravel
             URL::forceScheme('https');
         }
+
+        // Registrar observers
+        Task::observe(TaskObserver::class);
     }
 }

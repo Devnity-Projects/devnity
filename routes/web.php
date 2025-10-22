@@ -5,6 +5,7 @@ use App\Http\Controllers\CepController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskTimerController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskAttachmentController;
@@ -50,6 +51,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('tasks', TaskController::class);
     Route::patch('tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.update-status');
     Route::get('tasks-kanban', [TaskController::class, 'kanban'])->name('tasks.kanban');
+    
+    // Rotas do Timer de Tarefas
+    Route::post('tasks/{task}/timer/start', [TaskTimerController::class, 'start'])->name('tasks.timer.start');
+    Route::post('tasks/{task}/timer/stop', [TaskTimerController::class, 'stop'])->name('tasks.timer.stop');
+    Route::get('tasks/{task}/timer/status', [TaskTimerController::class, 'status'])->name('tasks.timer.status');
+    Route::get('tasks/{task}/timer/sessions', [TaskTimerController::class, 'sessions'])->name('tasks.timer.sessions');
+    Route::delete('tasks/{task}/timer/sessions/{entry}', [TaskTimerController::class, 'deleteSession'])->name('tasks.timer.delete-session');
     
     // Rotas de recursos avançados das tarefas
     Route::post('tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');

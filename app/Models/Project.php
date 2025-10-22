@@ -179,4 +179,82 @@ class Project extends Model
         $percentage = min(100, ($this->hours_worked / $this->hours_estimated) * 100);
         return number_format($percentage, 0) . '%';
     }
+
+    /**
+     * Calcula o total de horas estimadas de todas as tarefas do projeto
+     */
+    public function calculateTotalEstimatedHours(): float
+    {
+        return (float) $this->tasks()->sum('hours_estimated') ?? 0;
+    }
+
+    /**
+     * Calcula o total de horas trabalhadas em todas as tarefas do projeto
+     */
+    public function calculateTotalWorkedHours(): float
+    {
+        return (float) $this->tasks()->sum('hours_worked') ?? 0;
+    }
+
+    /**
+     * Sincroniza as horas do projeto com base nas tarefas
+     */
+    public function syncHoursFromTasks(): void
+    {
+        $estimatedHours = $this->calculateTotalEstimatedHours();
+        $workedHours = $this->calculateTotalWorkedHours();
+        
+        // Usar update em vez de atribuição direta para evitar problemas de tipo
+        $this->update([
+            'hours_estimated' => $estimatedHours > 0 ? $estimatedHours : 0,
+            'hours_worked' => $workedHours > 0 ? $workedHours : 0,
+        ]);
+    }
+
+    /**
+     * Calcula o progresso baseado nas tarefas
+     */
+    public function getTaskBasedProgressAttribute(): array
+    {
+        $totalTasks = $this->tasks()->count();
+        $completedTasks = $this->tasks()->where('status', Task::STATUS_COMPLETED)->count();
+        
+        $estimatedHours = $this->calculateTotalEstimatedHours();
+        $workedHours = $this->calculateTotalWorkedHours();
+        
+        return [
+            'tasks' => [
+                'total' => $totalTasks,
+                'completed' => $completedTasks,
+                'percentage' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0,
+            ],
+            'hours' => [
+                'estimated' => $estimatedHours,
+                'worked' => $workedHours,
+                'percentage' => $estimatedHours > 0 ? round(($workedHours / $estimatedHours) * 100, 1) : 0,
+            ],
+            // Média ponderada: 60% baseado em horas, 40% baseado em tarefas
+            'overall_percentage' => $this->calculateOverallProgress($totalTasks, $completedTasks, $estimatedHours, $workedHours),
+        ];
+    }
+
+    /**
+     * Calcula progresso geral ponderado
+     */
+    private function calculateOverallProgress(int $totalTasks, int $completedTasks, float $estimatedHours, float $workedHours): float
+    {
+        if ($totalTasks === 0 && $estimatedHours === 0) {
+            return 0;
+        }
+
+        $taskProgress = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+        $hourProgress = $estimatedHours > 0 ? min(100, ($workedHours / $estimatedHours) * 100) : 0;
+
+        // Se só temos um dos dois, usa apenas esse
+        if ($totalTasks === 0) return round($hourProgress, 1);
+        if ($estimatedHours === 0) return round($taskProgress, 1);
+
+        // Média ponderada: 60% horas, 40% tarefas
+        return round(($hourProgress * 0.6) + ($taskProgress * 0.4), 1);
+    }
 }
