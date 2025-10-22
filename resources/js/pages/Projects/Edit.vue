@@ -24,7 +24,7 @@ interface Project {
   id: number
   name: string
   description: string | null
-  client_id: number
+  client_id: number | null
   status: string
   priority: string
   type: string
@@ -76,7 +76,7 @@ const errors = ref<Record<string, string>>({})
 const newTechnology = ref('')
 
 const isFormValid = computed(() => {
-  return form.value.name && form.value.client_id && form.value.status && form.value.priority && form.value.type
+  return form.value.name && form.value.status && form.value.priority && form.value.type
 })
 
 function addTechnology() {
@@ -96,7 +96,13 @@ function submitForm() {
   processing.value = true
   errors.value = {}
 
-  router.put(`/projects/${props.project.id}`, form.value, {
+  // Preparar dados para envio (converter string vazia em null para client_id)
+  const dataToSubmit = {
+    ...form.value,
+    client_id: form.value.client_id || null
+  }
+
+  router.put(`/projects/${props.project.id}`, dataToSubmit, {
     preserveScroll: true,
     onError: (pageErrors) => {
       errors.value = pageErrors
@@ -157,7 +163,7 @@ function goBack() {
                 v-model="form.client_id"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Projeto Pessoal (sem cliente)</option>
+                <option :value="null">Projeto Pessoal (sem cliente)</option>
                 <option v-for="client in props.clients" :key="client.id" :value="client.id">{{ client.name }}</option>
               </select>
               <p v-if="errors.client_id" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.client_id }}</p>
