@@ -19,11 +19,28 @@ class ProjectController extends Controller
     // Carregar cliente com colunas mínimas; conte tasks sem carregar a coleção inteira
     $query = Project::with(['client:id,name'])->withCount('tasks');
 
-        // Search filter
+        // Search filter - busca global em todos os campos relevantes
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                // Buscar no nome do projeto
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                  // Buscar na descrição
+                  ->orWhere('description', 'like', '%' . $searchTerm . '%')
+                  // Buscar nas notas
+                  ->orWhere('notes', 'like', '%' . $searchTerm . '%')
+                  // Buscar nas URLs
+                  ->orWhere('repository_url', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('demo_url', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('production_url', 'like', '%' . $searchTerm . '%')
+                  // Buscar nas tecnologias (campo JSON)
+                  ->orWhereJsonContains('technologies', $searchTerm)
+                  // Buscar parcialmente nas tecnologias usando LIKE no JSON
+                  ->orWhereRaw('LOWER(JSON_EXTRACT(technologies, "$")) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+                  // Buscar no nome do cliente
+                  ->orWhereHas('client', function ($clientQuery) use ($searchTerm) {
+                      $clientQuery->where('name', 'like', '%' . $searchTerm . '%');
+                  });
             });
         }
 

@@ -50,11 +50,27 @@ class SearchController extends Controller
                 ];
             });
 
-        // Search projects
+        // Search projects - busca abrangente em todos os campos
         $projects = Project::with('client')
             ->where(function ($q) use ($query) {
+                // Buscar no nome do projeto
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('description', 'LIKE', "%{$query}%");
+                  // Buscar na descrição
+                  ->orWhere('description', 'LIKE', "%{$query}%")
+                  // Buscar nas notas
+                  ->orWhere('notes', 'LIKE', "%{$query}%")
+                  // Buscar nas URLs
+                  ->orWhere('repository_url', 'LIKE', "%{$query}%")
+                  ->orWhere('demo_url', 'LIKE', "%{$query}%")
+                  ->orWhere('production_url', 'LIKE', "%{$query}%")
+                  // Buscar nas tecnologias (campo JSON)
+                  ->orWhereJsonContains('technologies', $query)
+                  // Buscar parcialmente nas tecnologias usando LIKE no JSON
+                  ->orWhereRaw('LOWER(JSON_EXTRACT(technologies, "$")) LIKE ?', ['%' . strtolower($query) . '%'])
+                  // Buscar no nome do cliente
+                  ->orWhereHas('client', function ($clientQuery) use ($query) {
+                      $clientQuery->where('name', 'LIKE', "%{$query}%");
+                  });
             })
             ->limit(5)
             ->get()
@@ -63,10 +79,10 @@ class SearchController extends Controller
                     'id' => $project->id,
                     'name' => $project->name,
                     'description' => $project->description,
-                    'client' => [
+                    'client' => $project->client ? [
                         'id' => $project->client->id,
                         'name' => $project->client->name,
-                    ],
+                    ] : null,
                 ];
             });
 
