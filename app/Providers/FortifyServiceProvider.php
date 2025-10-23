@@ -13,6 +13,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Authenticated;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -70,5 +72,33 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetPasswordView(fn ($request) => inertia('auth/ResetPassword', [
             'request' => $request
         ]));
+
+        // Sincronizar grupos LDAP após autenticação
+        Event::listen(Authenticated::class, function (Authenticated $event) {
+            $user = $event->user;
+            
+            // Verificar se é usuário LDAP (tem guid) e é instância do modelo User
+            if ($user instanceof \App\Models\User && !empty($user->guid)) {
+                try {
+                    $ldapUser = \App\Ldap\User::findByGuid($user->guid);
+                    
+                    if ($ldapUser) {
+                        $groups = $ldapUser->getGroups() ?? [];
+                        $user->syncRolesFromLdap($groups);
+                        
+                        \Log::info('Grupos LDAP sincronizados no login', [
+                            'user' => $user->email ?? $user->samaccountname,
+                            'groups_count' => count($groups),
+                            'roles' => $user->getRoleNames()->toArray(),
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Erro ao sincronizar grupos LDAP no login', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        });
     }
 }
