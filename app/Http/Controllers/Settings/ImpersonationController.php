@@ -15,7 +15,7 @@ class ImpersonationController extends Controller
      */
     public function start(Request $request): RedirectResponse
     {
-        abort_unless($request->user()->can('manage users'), 403);
+        abort_unless($request->user()->can('users.impersonate'), 403);
 
         $data = $request->validate([
             'user_id' => ['required', 'integer', 'exists:users,id'],

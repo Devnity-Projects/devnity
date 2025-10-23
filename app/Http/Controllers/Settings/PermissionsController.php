@@ -22,10 +22,13 @@ class PermissionsController extends Controller
         
         // Current user's roles
         $roles = $user->getRoleNames()->toArray();
+        $userPermissions = $user->getAllPermissions()->pluck('name')->toArray();
         
         // Admin controls (only if user can manage users)
         $admin = null;
-        if ($user->can('manage users')) {
+        $rolesManagement = null;
+        
+        if ($user->can('users.manage')) {
             $targetUserId = $request->query('admin_user_id');
             $targetUser = $targetUserId ? User::find($targetUserId) : $user;
             
@@ -34,11 +37,24 @@ class PermissionsController extends Controller
             }
             
             // Get all users for selection
-            $allUsers = User::orderBy('name')->get(['id', 'name', 'email']);
+            $allUsers = User::with('roles')->orderBy('name')->get()->map(function ($u) {
+                return [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'roles' => $u->getRoleNames()->toArray(),
+                ];
+            });
             
             // Get all permissions and roles
             $allPermissions = Permission::orderBy('name')->pluck('name')->toArray();
-            $allRoles = Role::orderBy('name')->pluck('name')->toArray();
+            $allRoles = Role::orderBy('name')->get()->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'permissions_count' => $role->permissions()->count(),
+                ];
+            });
             
             // Get target user's roles and permissions
             $targetRoles = $targetUser->getRoleNames()->toArray();
@@ -67,6 +83,24 @@ class PermissionsController extends Controller
             ];
         }
         
+        // Role management (only if user can manage roles)
+        if ($user->can('roles.manage')) {
+            $rolesManagement = [
+                'enabled' => true,
+                'roles' => Role::with('permissions')->orderBy('name')->get()->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'permissions' => $role->permissions->pluck('name')->toArray(),
+                        'users_count' => $role->users()->count(),
+                    ];
+                }),
+                'allPermissions' => Permission::orderBy('name')->pluck('name')->toArray(),
+                'permissionGroups' => $this->getPermissionGroups(),
+                'permissionsMeta' => $this->getPermissionsMeta(),
+            ];
+        }
+        
         return Inertia::render('Settings/Permissions', [
             'user' => [
                 'id' => $user->id,
@@ -75,7 +109,9 @@ class PermissionsController extends Controller
                 'avatar_url' => $user->avatar_url,
             ],
             'roles' => $roles,
+            'permissions' => $userPermissions,
             'admin' => $admin,
+            'rolesManagement' => $rolesManagement,
         ]);
     }
     
@@ -84,7 +120,7 @@ class PermissionsController extends Controller
      */
     public function toggleRole(Request $request)
     {
-        abort_unless($request->user()->can('manage users'), 403);
+        abort_unless($request->user()->can('users.manage'), 403);
         
         $data = $request->validate([
             'user_id' => ['required', 'integer', 'exists:users,id'],
@@ -108,7 +144,7 @@ class PermissionsController extends Controller
      */
     public function togglePermission(Request $request)
     {
-        abort_unless($request->user()->can('manage users'), 403);
+        abort_unless($request->user()->can('users.manage'), 403);
         
         $data = $request->validate([
             'user_id' => ['required', 'integer', 'exists:users,id'],
@@ -128,15 +164,78 @@ class PermissionsController extends Controller
     }
     
     /**
+     * Create a new role.
+     */
+    public function createRole(Request $request)
+    {
+        abort_unless($request->user()->can('roles.manage'), 403);
+        
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
+            'permissions' => ['array'],
+            'permissions.*' => ['string', 'exists:permissions,name'],
+        ]);
+        
+        $role = Role::create(['name' => $data['name']]);
+        
+        if (!empty($data['permissions'])) {
+            $role->syncPermissions($data['permissions']);
+        }
+        
+        return back()->with('success', 'Role criada com sucesso.');
+    }
+    
+    /**
+     * Update a role's permissions.
+     */
+    public function updateRole(Request $request, Role $role)
+    {
+        abort_unless($request->user()->can('roles.manage'), 403);
+        
+        $data = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255', 'unique:roles,name,' . $role->id],
+            'permissions' => ['array'],
+            'permissions.*' => ['string', 'exists:permissions,name'],
+        ]);
+        
+        if (isset($data['name'])) {
+            $role->update(['name' => $data['name']]);
+        }
+        
+        if (isset($data['permissions'])) {
+            $role->syncPermissions($data['permissions']);
+        }
+        
+        return back()->with('success', 'Role atualizada com sucesso.');
+    }
+    
+    /**
+     * Delete a role.
+     */
+    public function deleteRole(Role $role)
+    {
+        abort_unless(request()->user()->can('roles.manage'), 403);
+        
+        // Prevent deletion of system roles
+        if (in_array($role->name, ['Super Admin', 'Admin'])) {
+            return back()->with('error', 'Roles do sistema não podem ser excluídas.');
+        }
+        
+        $role->delete();
+        
+        return back()->with('success', 'Role excluída com sucesso.');
+    }
+    
+    /**
      * Get permission groups for organization.
      */
     protected function getPermissionGroups(): array
     {
         return [
             [
-                'key' => 'users',
-                'label' => 'Usuários',
-                'permissions' => ['manage users', 'view users'],
+                'key' => 'dashboard',
+                'label' => 'Dashboard',
+                'permissions' => ['dashboard.view'],
             ],
             [
                 'key' => 'clients',
@@ -151,7 +250,7 @@ class PermissionsController extends Controller
             [
                 'key' => 'tasks',
                 'label' => 'Tarefas',
-                'permissions' => ['tasks.view', 'tasks.create', 'tasks.edit', 'tasks.delete'],
+                'permissions' => ['tasks.view', 'tasks.create', 'tasks.edit', 'tasks.delete', 'tasks.assign'],
             ],
             [
                 'key' => 'support',
@@ -163,6 +262,26 @@ class PermissionsController extends Controller
                 'label' => 'Financeiro',
                 'permissions' => ['financial.view', 'financial.manage'],
             ],
+            [
+                'key' => 'users',
+                'label' => 'Usuários',
+                'permissions' => ['users.view', 'users.manage', 'users.impersonate'],
+            ],
+            [
+                'key' => 'roles',
+                'label' => 'Roles',
+                'permissions' => ['roles.view', 'roles.manage'],
+            ],
+            [
+                'key' => 'settings',
+                'label' => 'Configurações',
+                'permissions' => ['settings.view', 'settings.manage'],
+            ],
+            [
+                'key' => 'system',
+                'label' => 'Sistema',
+                'permissions' => ['system.logs', 'system.manage'],
+            ],
         ];
     }
     
@@ -172,38 +291,55 @@ class PermissionsController extends Controller
     protected function getPermissionsMeta(): array
     {
         return [
-            'manage users' => [
-                'label' => 'Gerenciar Usuários',
-                'description' => 'Permite gerenciar usuários, roles e permissões',
-            ],
-            'view users' => [
-                'label' => 'Visualizar Usuários',
-                'description' => 'Permite visualizar lista de usuários',
-            ],
-            'clients.view' => [
-                'label' => 'Visualizar Clientes',
-                'description' => 'Permite visualizar clientes',
-            ],
-            'clients.create' => [
-                'label' => 'Criar Clientes',
-                'description' => 'Permite criar novos clientes',
-            ],
-            'clients.edit' => [
-                'label' => 'Editar Clientes',
-                'description' => 'Permite editar clientes existentes',
-            ],
-            'clients.delete' => [
-                'label' => 'Excluir Clientes',
-                'description' => 'Permite excluir clientes',
-            ],
-            'financial.view' => [
-                'label' => 'Visualizar Financeiro',
-                'description' => 'Permite visualizar dados financeiros',
-            ],
-            'financial.manage' => [
-                'label' => 'Gerenciar Financeiro',
-                'description' => 'Permite gerenciar completamente o módulo financeiro',
-            ],
+            // Dashboard
+            'dashboard.view' => ['label' => 'Visualizar Dashboard', 'description' => 'Acesso ao dashboard'],
+            
+            // Clientes
+            'clients.view' => ['label' => 'Visualizar Clientes', 'description' => 'Ver lista e detalhes de clientes'],
+            'clients.create' => ['label' => 'Criar Clientes', 'description' => 'Criar novos clientes'],
+            'clients.edit' => ['label' => 'Editar Clientes', 'description' => 'Modificar clientes existentes'],
+            'clients.delete' => ['label' => 'Excluir Clientes', 'description' => 'Remover clientes'],
+            
+            // Projetos
+            'projects.view' => ['label' => 'Visualizar Projetos', 'description' => 'Ver lista e detalhes de projetos'],
+            'projects.create' => ['label' => 'Criar Projetos', 'description' => 'Criar novos projetos'],
+            'projects.edit' => ['label' => 'Editar Projetos', 'description' => 'Modificar projetos existentes'],
+            'projects.delete' => ['label' => 'Excluir Projetos', 'description' => 'Remover projetos'],
+            
+            // Tarefas
+            'tasks.view' => ['label' => 'Visualizar Tarefas', 'description' => 'Ver lista e detalhes de tarefas'],
+            'tasks.create' => ['label' => 'Criar Tarefas', 'description' => 'Criar novas tarefas'],
+            'tasks.edit' => ['label' => 'Editar Tarefas', 'description' => 'Modificar tarefas existentes'],
+            'tasks.delete' => ['label' => 'Excluir Tarefas', 'description' => 'Remover tarefas'],
+            'tasks.assign' => ['label' => 'Atribuir Tarefas', 'description' => 'Atribuir tarefas a usuários'],
+            
+            // Financeiro
+            'financial.view' => ['label' => 'Visualizar Financeiro', 'description' => 'Ver dados e relatórios financeiros'],
+            'financial.manage' => ['label' => 'Gerenciar Financeiro', 'description' => 'Criar, editar e excluir transações'],
+            
+            // Suporte
+            'support.view' => ['label' => 'Visualizar Suporte', 'description' => 'Ver tickets de suporte'],
+            'support.create' => ['label' => 'Criar Tickets', 'description' => 'Abrir novos tickets'],
+            'support.edit' => ['label' => 'Editar Tickets', 'description' => 'Modificar tickets existentes'],
+            'support.delete' => ['label' => 'Excluir Tickets', 'description' => 'Remover tickets'],
+            'support.admin' => ['label' => 'Administrar Suporte', 'description' => 'Acesso total ao sistema de suporte'],
+            
+            // Usuários
+            'users.view' => ['label' => 'Visualizar Usuários', 'description' => 'Ver lista de usuários'],
+            'users.manage' => ['label' => 'Gerenciar Usuários', 'description' => 'Criar, editar e gerenciar usuários'],
+            'users.impersonate' => ['label' => 'Visualizar como Usuário', 'description' => 'Impersonar outros usuários'],
+            
+            // Roles
+            'roles.view' => ['label' => 'Visualizar Roles', 'description' => 'Ver lista de roles'],
+            'roles.manage' => ['label' => 'Gerenciar Roles', 'description' => 'Criar, editar e excluir roles'],
+            
+            // Configurações
+            'settings.view' => ['label' => 'Visualizar Configurações', 'description' => 'Acesso às configurações'],
+            'settings.manage' => ['label' => 'Gerenciar Configurações', 'description' => 'Modificar configurações do sistema'],
+            
+            // Sistema
+            'system.logs' => ['label' => 'Visualizar Logs', 'description' => 'Acesso aos logs do sistema'],
+            'system.manage' => ['label' => 'Gerenciar Sistema', 'description' => 'Controle total do sistema'],
         ];
     }
 }
