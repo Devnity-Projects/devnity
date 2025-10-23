@@ -105,6 +105,8 @@ task('vite:remove-hot', function () {
 
 desc('Subir containers Docker');
 task('docker:up', function () {
+    // Para containers existentes antes de subir novos (garante que as portas sejam publicadas)
+    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} down || true');
     run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} up -d');
 });
 
@@ -237,6 +239,14 @@ task('deploy:cleanup', function () {
 desc('Verificar status dos containers');
 task('docker:status', function () {
     run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} ps');
+});
+
+desc('Recriar containers (down + up) para aplicar portas');
+task('docker:recreate', function () {
+    info('🔄 Recriando containers Docker...');
+    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} down');
+    run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} up -d');
+    info('✅ Containers recriados com sucesso!');
 });
 
 desc('Ver logs da aplicação');
