@@ -18,9 +18,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y \
     # Instala o Node.js e o npm
     nodejs \
-    # Instala o PHP e suas extensões
+    # Instala o PHP e suas extensões (incluindo LDAP)
     php8.3-fpm php8.3-mysql php8.3-mbstring \
     php8.3-xml php8.3-gd php8.3-curl php8.3-zip php8.3-bcmath php8.3-intl \
+    php8.3-ldap \
+    # Instala as bibliotecas LDAP necessárias
+    libldap-2.5-0 libldap-common \
     # Limpa o cache para manter a imagem menor
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
