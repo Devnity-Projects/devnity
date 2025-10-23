@@ -24,6 +24,17 @@ set('use_relative_symlink', true);
 set('ssh_multiplexing', false);
 set('default_timeout', 3600); // Timeout padrão para comandos longos
 
+// Helper function para executar comandos Docker com volume montado
+function dockerRun(string $command, array $options = []): string {
+    $projectName = get('docker_project_name');
+    $timeout = $options['timeout'] ?? 1800;
+    $env = $options['env'] ?? '';
+    
+    $dockerCmd = "docker compose --project-name {$projectName} run --rm --no-deps --entrypoint \"\" -v \"{{release_path}}:/var/www/html\" -w /var/www/html {$env} app {$command}";
+    
+    return run("cd {{release_path}} && {$dockerCmd}", ['timeout' => $timeout]);
+}
+
 // ==========================================
 // CONFIGURAÇÃO DO SERVIDOR
 // ==========================================
@@ -68,13 +79,13 @@ task('docker:build', function () {
 desc('Instalar dependências Node.js');
 task('npm:install', function () {
     info('📦 Instalando dependências Node.js...');
-    run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app npm ci', ['timeout' => 1800]);
+    dockerRun('npm ci', ['timeout' => 1800]);
 });
 
 desc('Compilar assets com Vite');
 task('npm:build', function () {
     info('⚡ Compilando assets com Vite...');
-    run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app npm run build', ['timeout' => 1800]);
+    dockerRun('npm run build', ['timeout' => 1800]);
 });
 
 task('build:assets', [
@@ -112,7 +123,7 @@ task('seed:permissions', function () {
         if docker compose --project-name {{docker_project_name}} ps -q app | grep -q .; then \
             docker compose --project-name {{docker_project_name}} exec -T app ' . $cmd . '; \
         else \
-            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app ' . $cmd . '; \
+            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -v "$(readlink -f {{deploy_path}}/current):/var/www/html" -w /var/www/html app ' . $cmd . '; \
         fi; \
     else \
         echo "Nenhum release atual encontrado. Execute um deploy primeiro."; exit 1; \
@@ -128,7 +139,7 @@ task('seed:roles', function () {
         if docker compose --project-name {{docker_project_name}} ps -q app | grep -q .; then \
             docker compose --project-name {{docker_project_name}} exec -T app ' . $cmd . '; \
         else \
-            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app ' . $cmd . '; \
+            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -v "$(readlink -f {{deploy_path}}/current):/var/www/html" -w /var/www/html app ' . $cmd . '; \
         fi; \
     else \
         echo "Nenhum release atual encontrado. Execute um deploy primeiro."; exit 1; \
@@ -159,7 +170,7 @@ php artisan route:cache || { echo "[warn] route:cache falhou, executando route:c
         if docker compose --project-name {{docker_project_name}} ps -q app | grep -q .; then \
             docker compose --project-name {{docker_project_name}} exec -T app bash -lc ' . escapeshellarg($cmd) . '; \
         else \
-            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html app bash -lc ' . escapeshellarg($cmd) . '; \
+            docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -v "$(readlink -f {{deploy_path}}/current):/var/www/html" -w /var/www/html app bash -lc ' . escapeshellarg($cmd) . '; \
         fi; \
     else \
         echo "Nenhum release atual encontrado. Execute um deploy primeiro."; exit 1; \
@@ -269,7 +280,10 @@ task('deploy', [
 // Sobrescreve o deploy:vendors para executar dentro do container Docker
 task('deploy:vendors', function () {
     info('📚 Instalando dependências PHP com Composer...');
-    run('cd {{release_path}} && docker compose --project-name {{docker_project_name}} run --rm --no-deps --entrypoint "" -w /var/www/html -e COMPOSER_ALLOW_SUPERUSER=1 app composer install --verbose --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader', ['timeout' => 1800]);
+    dockerRun('composer install --verbose --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader', [
+        'timeout' => 1800,
+        'env' => '-e COMPOSER_ALLOW_SUPERUSER=1'
+    ]);
 })->desc('Instalar vendors com Composer dentro do Docker');
 
 // ==========================================
