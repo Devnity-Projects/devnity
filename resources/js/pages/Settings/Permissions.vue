@@ -2,7 +2,7 @@
 import { router } from '@inertiajs/vue3'
 import { useAbility } from '@/composables/useAbility'
 import { ref, computed } from 'vue'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 interface User { 
   id: number
