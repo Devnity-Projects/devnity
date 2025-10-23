@@ -35,6 +35,24 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
+        // Customizar autenticação para aceitar username ou email
+        Fortify::authenticateUsing(function (Request $request) {
+            $credentials = [
+                'password' => $request->password,
+            ];
+
+            // Detectar se é email ou username
+            // OpenLDAP usa 'uid', Active Directory usa 'samaccountname'
+            $loginField = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'uid';
+            $credentials[$loginField] = $request->email;
+
+            if (\Illuminate\Support\Facades\Auth::attempt($credentials, $request->filled('remember'))) {
+                return \Illuminate\Support\Facades\Auth::user();
+            }
+
+            return null;
+        });
+
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 

@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         
         $middleware->alias([
             'ensure.user.settings' => EnsureUserSettings::class,
+            'sync.ldap.groups' => \App\Http\Middleware\SyncLdapGroups::class,
             // Spatie permission middlewares
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

@@ -61,8 +61,21 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'driver' => 'ldap',
+            'model' => App\Ldap\User::class,
+            'rules' => [],
+            'database' => [
+                'model' => App\Models\User::class,
+                'sync_passwords' => false,
+                'sync_attributes' => [
+                    'name' => 'cn',
+                    'email' => 'mail',
+                    'samaccountname' => 'uid', // OpenLDAP usa 'uid'
+                ],
+                'sync_existing' => [
+                    'samaccountname' => 'uid', // Buscar por username primeiro
+                ],
+            ],
         ],
 
         // 'users' => [

@@ -2,7 +2,7 @@
 import { useForm, router, Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { Eye, EyeOff, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-vue-next'
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import AuthLayout from '@/Layouts/AuthLayout.vue'
 
 const form = useForm({
   email: '',
@@ -32,7 +32,7 @@ function submit() {
           Acesse sua conta
         </h2>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
-          Entre com suas credenciais para continuar
+          Entre com suas credenciais do Active Directory
         </p>
       </div>
 
@@ -52,7 +52,7 @@ function submit() {
         <!-- Email Field -->
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            E-mail
+            Usuário ou E-mail
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -61,13 +61,16 @@ function submit() {
             <input
               id="email"
               v-model="form.email"
-              type="email"
-              autocomplete="email"
+              type="text"
+              autocomplete="username"
               required
               class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              placeholder="seu@email.com"
+              placeholder="usuario.dominio ou seu@email.com"
             />
           </div>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Use seu usuário do Active Directory ou e-mail
+          </p>
         </div>
 
         <!-- Password Field -->
@@ -147,16 +150,6 @@ function submit() {
         </p>
       </div>
 
-      <!-- Demo Credentials (for development) -->
-      <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Credenciais de demonstração:
-        </h4>
-        <div class="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-          <p><strong>Email:</strong> admin@devnity.com</p>
-          <p><strong>Senha:</strong> password</p>
-        </div>
-      </div>
     </div>
   </AuthLayout>
 </template>

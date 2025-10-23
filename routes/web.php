@@ -25,7 +25,7 @@ use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('auth/Login'))->name('login');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'sync.ldap.groups'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // API Routes

@@ -9,11 +9,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Storage;
+use LdapRecord\Laravel\Auth\LdapAuthenticatable;
+use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 
-class User extends Authenticatable
+class User extends Authenticatable implements LdapAuthenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, AuthenticatesWithLdap;
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +29,9 @@ class User extends Authenticatable
         'password',
         'phone',
         'bio',
+        'domain',
+        'guid',
+        'samaccountname',
         // Removido 'avatar' do fillable por segurança - deve ser atualizado separadamente
     ];
 
@@ -88,5 +93,41 @@ class User extends Authenticatable
         }
         
         return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&color=7F9CF5&background=EBF4FF";
+    }
+
+    /**
+     * Sincroniza roles baseado em grupos do Active Directory
+     */
+    public function syncRolesFromLdap(array $groups): void
+    {
+        // Mapeamento de grupos AD para roles do sistema
+        $roleMappings = [
+            env('LDAP_ADMIN_GROUP', 'CN=Administradores,CN=Users,DC=dominio,DC=local') => 'admin',
+            env('LDAP_MANAGER_GROUP', 'CN=Gerentes,CN=Users,DC=dominio,DC=local') => 'manager',
+            env('LDAP_DEVELOPER_GROUP', 'CN=Desenvolvedores,CN=Users,DC=dominio,DC=local') => 'developer',
+            env('LDAP_SUPPORT_GROUP', 'CN=Suporte,CN=Users,DC=dominio,DC=local') => 'support',
+            env('LDAP_FINANCIAL_GROUP', 'CN=Financeiro,CN=Users,DC=dominio,DC=local') => 'financial',
+            env('LDAP_CLIENT_GROUP', 'CN=Clientes,CN=Users,DC=dominio,DC=local') => 'client',
+        ];
+
+        $assignRoles = [];
+
+        foreach ($groups as $group) {
+            if (isset($roleMappings[$group])) {
+                $assignRoles[] = $roleMappings[$group];
+            }
+        }
+
+        if (!empty($assignRoles)) {
+            // Sincroniza roles (remove antigas e adiciona novas)
+            $this->syncRoles($assignRoles);
+            \Log::info("Roles sincronizadas para usuário {$this->email}: " . implode(', ', $assignRoles));
+        } else {
+            // Role padrão se não encontrar grupo correspondente
+            if (!$this->hasAnyRole(['developer', 'client', 'admin', 'manager', 'support', 'financial'])) {
+                $this->assignRole('developer');
+                \Log::info("Role padrão 'developer' atribuída ao usuário {$this->email}");
+            }
+        }
     }
 }
