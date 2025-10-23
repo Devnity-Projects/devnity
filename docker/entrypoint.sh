@@ -14,7 +14,8 @@ echo "Instalando dependências do Composer..."
 composer install --no-interaction --optimize-autoloader --no-dev
 
 # Gera chave da aplicação se não existir
-if [ ! -f .env ]; then
+# Verifica se .env existe e é legível (funciona com symlinks)
+if [ ! -r .env ]; then
     echo "Copiando .env.example para .env..."
     cp .env.example .env
     php artisan key:generate

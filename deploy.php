@@ -24,14 +24,34 @@ set('use_relative_symlink', true);
 set('ssh_multiplexing', false);
 set('default_timeout', 3600); // Timeout padrão para comandos longos
 
-// Helper function para executar comandos Docker com volume montado
+// Helper function para executar comandos Docker
+// Durante build (antes do docker:up): usa 'run' com volume temporário
+// Após docker:up: usa 'exec' no container rodando (evita criar containers sem porta)
 function dockerRun(string $command, array $options = []): string {
     $projectName = get('docker_project_name');
     $timeout = $options['timeout'] ?? 1800;
     $env = $options['env'] ?? '';
+    $forceRun = $options['force_run'] ?? false; // Força uso do 'run' mesmo se container estiver rodando
     
+    // Se force_run estiver ativo, sempre usa 'run' (necessário durante o build)
+    if (!$forceRun) {
+        // Tenta usar exec se o container estiver rodando
+        $checkCmd = "cd {{release_path}} 2>/dev/null && docker compose --project-name {$projectName} ps -q app 2>/dev/null | grep -q . && echo 'yes' || echo 'no'";
+        
+        try {
+            $isRunning = run($checkCmd, ['timeout' => 10]);
+            if (trim($isRunning) === 'yes') {
+                info('🔄 Usando container existente (exec)...');
+                $dockerCmd = "docker compose --project-name {$projectName} exec -T {$env} app {$command}";
+                return run("cd {{release_path}} && {$dockerCmd}", ['timeout' => $timeout]);
+            }
+        } catch (\Exception $e) {
+            // Se falhar a verificação, continua para usar 'run'
+        }
+    }
+    
+    // Container não está rodando ou force_run ativo - usa 'run' temporário
     $dockerCmd = "docker compose --project-name {$projectName} run --rm --no-deps --entrypoint \"\" -v \"{{release_path}}:/var/www/html\" -w /var/www/html {$env} app {$command}";
-    
     return run("cd {{release_path}} && {$dockerCmd}", ['timeout' => $timeout]);
 }
 
@@ -79,13 +99,13 @@ task('docker:build', function () {
 desc('Instalar dependências Node.js');
 task('npm:install', function () {
     info('📦 Instalando dependências Node.js...');
-    dockerRun('npm ci', ['timeout' => 1800]);
+    dockerRun('npm ci', ['timeout' => 1800, 'force_run' => true]);
 });
 
 desc('Compilar assets com Vite');
 task('npm:build', function () {
     info('⚡ Compilando assets com Vite...');
-    dockerRun('npm run build', ['timeout' => 1800]);
+    dockerRun('npm run build', ['timeout' => 1800, 'force_run' => true]);
 });
 
 task('build:assets', [
@@ -112,8 +132,26 @@ task('docker:up', function () {
 
 desc('Aguardar containers iniciarem');
 task('docker:wait', function () {
-    info('⏳ Aguardando 5 segundos para os containers iniciarem...');
-    sleep(5);
+    info('⏳ Aguardando containers estarem prontos...');
+    
+    // Aguarda até 30 segundos para o container estar rodando
+    $maxAttempts = 30;
+    $attempt = 0;
+    
+    while ($attempt < $maxAttempts) {
+        $result = run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} ps -q app 2>/dev/null || echo ""', ['timeout' => 10]);
+        
+        if (!empty(trim($result))) {
+            info('✅ Container está rodando!');
+            sleep(2); // Aguarda mais 2 segundos para garantir que o PHP-FPM/Nginx estejam prontos
+            return;
+        }
+        
+        $attempt++;
+        sleep(1);
+    }
+    
+    warning('⚠️ Container pode não estar completamente pronto após 30 segundos.');
 });
 
 // Seeders opcionais (não executam automaticamente no deploy)
@@ -254,6 +292,22 @@ task('logs', function () {
     run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} logs --tail=50 app');
 });
 
+desc('Verificar se portas estão publicadas');
+task('docker:verify_ports', function () {
+    info('🔍 Verificando portas publicadas...');
+    $result = run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} ps');
+    
+    if (strpos($result, '8002->80') === false) {
+        warning('⚠️ Porta 8002 não está publicada! Recriando containers...');
+        run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} down');
+        run('cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} up -d');
+        sleep(3);
+        info('✅ Containers recriados com portas!');
+    } else {
+        info('✅ Porta 8002 está publicada corretamente!');
+    }
+});
+
 desc('Modo manutenção ON');
 task('maintenance:on', function () {
     run('[ -L {{deploy_path}}/current ] && cd $(readlink -f {{deploy_path}}/current) && docker compose --project-name {{docker_project_name}} exec -T app php artisan down --retry=60 || true');
@@ -284,6 +338,7 @@ task('deploy', [
     'docker:wait',    
     'artisan:cache',
     'queue:restart',
+    'docker:verify_ports', // Verifica se as portas estão publicadas
     'deploy:cleanup',
 ])->desc('Fluxo de deploy completo');
 
@@ -292,7 +347,8 @@ task('deploy:vendors', function () {
     info('📚 Instalando dependências PHP com Composer...');
     dockerRun('composer install --verbose --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader', [
         'timeout' => 1800,
-        'env' => '-e COMPOSER_ALLOW_SUPERUSER=1'
+        'env' => '-e COMPOSER_ALLOW_SUPERUSER=1',
+        'force_run' => true
     ]);
 })->desc('Instalar vendors com Composer dentro do Docker');
 
