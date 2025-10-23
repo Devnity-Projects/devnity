@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\PasswordController;
+use App\Http\Controllers\Settings\PermissionsController;
+use App\Http\Controllers\Settings\ImpersonationController;
 use App\Http\Controllers\FinancialDashboardController;
 use App\Http\Controllers\FinancialCategoryController;
 use App\Http\Controllers\FinancialTransactionController;
@@ -131,6 +133,13 @@ Route::middleware(['auth', 'sync.ldap.groups'])->group(function () {
         
         Route::get('/password', [PasswordController::class, 'edit'])->name('password.edit');
         Route::patch('/password', [PasswordController::class, 'update'])->name('password.update');
+        
+        Route::get('/permissions', [PermissionsController::class, 'edit'])->name('permissions');
+        Route::post('/admin/roles/toggle', [PermissionsController::class, 'toggleRole'])->name('admin.roles.toggle');
+        Route::post('/admin/permissions/toggle', [PermissionsController::class, 'togglePermission'])->name('admin.permissions.toggle');
+        
+        Route::post('/impersonate/start', [ImpersonationController::class, 'start'])->name('impersonate.start');
+        Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
     });
 
 
