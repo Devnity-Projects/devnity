@@ -96,38 +96,50 @@ class User extends Authenticatable implements LdapAuthenticatable
     }
 
     /**
-     * Sincroniza roles baseado em grupos do Active Directory
+     * Sincroniza roles baseado em grupos do LDAP/Active Directory
      */
     public function syncRolesFromLdap(array $groups): void
     {
-        // Mapeamento de grupos AD para roles do sistema
+        // Mapeamento de grupos LDAP para roles do sistema (case-insensitive)
         $roleMappings = [
-            env('LDAP_ADMIN_GROUP', 'CN=Administradores,CN=Users,DC=dominio,DC=local') => 'admin',
-            env('LDAP_MANAGER_GROUP', 'CN=Gerentes,CN=Users,DC=dominio,DC=local') => 'manager',
-            env('LDAP_DEVELOPER_GROUP', 'CN=Desenvolvedores,CN=Users,DC=dominio,DC=local') => 'developer',
-            env('LDAP_SUPPORT_GROUP', 'CN=Suporte,CN=Users,DC=dominio,DC=local') => 'support',
-            env('LDAP_FINANCIAL_GROUP', 'CN=Financeiro,CN=Users,DC=dominio,DC=local') => 'financial',
-            env('LDAP_CLIENT_GROUP', 'CN=Clientes,CN=Users,DC=dominio,DC=local') => 'client',
+            env('LDAP_ADMIN_GROUP', 'cn=Administradores,ou=groups,dc=devnity,dc=com,dc=br') => 'admin',
+            env('LDAP_MANAGER_GROUP', 'cn=Gerentes,ou=groups,dc=devnity,dc=com,dc=br') => 'manager',
+            env('LDAP_DEVELOPER_GROUP', 'cn=Desenvolvedores,ou=groups,dc=devnity,dc=com,dc=br') => 'developer',
+            env('LDAP_SUPPORT_GROUP', 'cn=Suporte,ou=groups,dc=devnity,dc=com,dc=br') => 'support',
+            env('LDAP_FINANCIAL_GROUP', 'cn=Financeiro,ou=groups,dc=devnity,dc=com,dc=br') => 'financial',
+            env('LDAP_CLIENT_GROUP', 'cn=Clientes,ou=groups,dc=devnity,dc=com,dc=br') => 'client',
         ];
 
         $assignRoles = [];
 
+        // Comparação case-insensitive dos DNs
         foreach ($groups as $group) {
-            if (isset($roleMappings[$group])) {
-                $assignRoles[] = $roleMappings[$group];
+            foreach ($roleMappings as $ldapGroup => $role) {
+                if (strcasecmp($group, $ldapGroup) === 0) {
+                    $assignRoles[] = $role;
+                    break;
+                }
             }
         }
+
+        \Log::info("Mapeamento de grupos LDAP para roles", [
+            'user' => $this->email ?? $this->samaccountname,
+            'ldap_groups' => $groups,
+            'mapped_roles' => $assignRoles
+        ]);
 
         if (!empty($assignRoles)) {
             // Sincroniza roles (remove antigas e adiciona novas)
             $this->syncRoles($assignRoles);
-            \Log::info("Roles sincronizadas para usuário {$this->email}: " . implode(', ', $assignRoles));
+            \Log::info("Roles sincronizadas automaticamente", [
+                'user' => $this->email ?? $this->samaccountname,
+                'roles' => $assignRoles
+            ]);
         } else {
-            // Role padrão se não encontrar grupo correspondente
-            if (!$this->hasAnyRole(['developer', 'client', 'admin', 'manager', 'support', 'financial'])) {
-                $this->assignRole('developer');
-                \Log::info("Role padrão 'developer' atribuída ao usuário {$this->email}");
-            }
+            \Log::warning("Nenhum grupo LDAP mapeado para roles", [
+                'user' => $this->email ?? $this->samaccountname,
+                'ldap_groups' => $groups
+            ]);
         }
     }
 }
