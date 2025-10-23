@@ -2,7 +2,7 @@
 import { useForm, router, Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { Eye, EyeOff, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-vue-next'
-import AuthLayout from '@/Layouts/AuthLayout.vue'
+import AuthLayout from '@/layouts/AuthLayout.vue'
 
 const form = useForm({
   email: '',
