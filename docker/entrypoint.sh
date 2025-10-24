@@ -21,15 +21,12 @@ if [ ! -r .env ]; then
     php artisan key:generate
 fi
 
-# Otimizações Laravel
-echo "Executando otimizações Laravel..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# NOTA: Otimizações Laravel (config:cache, route:cache, view:cache) são executadas
+# pelo deploy após o container subir, para evitar problemas com symlinks do storage.
 
-# Ajusta permissões
+# Ajusta permissões (somente se os diretórios existirem localmente)
 echo "Ajustando permissões..."
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
 
 # Inicia o Supervisor, que gerencia o Nginx e o PHP-FPM
 echo "Iniciando Supervisor..."
