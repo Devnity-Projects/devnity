@@ -73,15 +73,38 @@ onUnmounted(() => {
 
 // Navigation (with optional permission requirements)
 const { can } = useAbility()
+
+// Get menu visibility settings from shared Inertia data
+const menuVisibility = computed(() => {
+  const props = page.props as any
+  return props.menuVisibility || {
+    tasks: true,
+    projects: true,
+    clients: true,
+    financial: false,
+    support: false,
+  }
+})
+
 const nav = [
-  { label: 'Dashboard', href: '/dashboard', icon: Home, description: 'Visão geral do sistema' },
-  { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos', perm: ['clients.view','clients.manage'] },
-  { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento', perm: ['projects.view','projects.manage'] },
-  { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos', perm: ['tasks.view','tasks.manage'] },
-  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['financial.view','financial.manage'] },
-  { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte', perm: ['support.admin','support.tickets.view'] },
+  { label: 'Dashboard', href: '/dashboard', icon: Home, description: 'Visão geral do sistema', key: 'dashboard' },
+  { label: 'Clientes', href: '/clients', icon: Users, description: 'Gerenciar clientes e contatos', perm: ['clients.view','clients.manage'], key: 'clients' },
+  { label: 'Projetos', href: '/projects', icon: FolderKanban, description: 'Projetos de desenvolvimento', perm: ['projects.view','projects.manage'], key: 'projects' },
+  { label: 'Tarefas', href: '/tasks', icon: Briefcase, description: 'Gerenciar tarefas dos projetos', perm: ['tasks.view','tasks.manage'], key: 'tasks' },
+  { label: 'Financeiro', href: '/financial', icon: Zap, description: 'Gestão financeira', perm: ['financial.view','financial.manage'], key: 'financial' },
+  { label: 'Suporte', href: '/support/admin', icon: LifeBuoy, description: 'Sistema de suporte', perm: ['support.admin','support.tickets.view'], key: 'support' },
 ]
-const permittedNav = computed(() => nav.filter((i: any) => !i.perm || can(...(Array.isArray(i.perm) ? i.perm : [i.perm]))))
+
+const permittedNav = computed(() => 
+  nav.filter((i: any) => {
+    // Check menu visibility setting
+    if (i.key && i.key !== 'dashboard' && menuVisibility.value[i.key] === false) {
+      return false
+    }
+    // Check permissions
+    return !i.perm || can(...(Array.isArray(i.perm) ? i.perm : [i.perm]))
+  })
+)
 
 // UI State
 const showProfile = ref(false)

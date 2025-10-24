@@ -19,6 +19,7 @@ use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\PermissionsController;
 use App\Http\Controllers\Settings\ImpersonationController;
+use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\FinancialDashboardController;
 use App\Http\Controllers\FinancialCategoryController;
 use App\Http\Controllers\FinancialTransactionController;
@@ -96,13 +97,16 @@ Route::middleware(['auth', 'sync.ldap.groups'])->group(function () {
     // Rotas de tarefas
     Route::middleware('permission:tasks.view')->group(function () {
         Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
-        Route::get('tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
         Route::get('tasks-kanban', [TaskController::class, 'kanban'])->name('tasks.kanban');
     });
     
     Route::middleware('permission:tasks.create')->group(function () {
         Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
         Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
+    });
+    
+    Route::middleware('permission:tasks.view')->group(function () {
+        Route::get('tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
     });
     
     Route::middleware('permission:tasks.edit')->group(function () {
@@ -235,6 +239,12 @@ Route::middleware(['auth', 'sync.ldap.groups'])->group(function () {
         
         Route::post('/impersonate/start', [ImpersonationController::class, 'start'])->name('impersonate.start');
         Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
+        
+        // System Settings (admin only)
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/system', [SystemSettingsController::class, 'index'])->name('system');
+            Route::post('/system/menu-visibility', [SystemSettingsController::class, 'updateMenuVisibility'])->name('system.menu-visibility');
+        });
     });
 
 
