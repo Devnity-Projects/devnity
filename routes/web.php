@@ -29,6 +29,18 @@ use Inertia\Inertia;
 Route::get('/', fn () => Inertia::render('auth/Login'))->name('login');
 
 Route::middleware(['auth', 'sync.ldap.groups'])->group(function () {
+    // Rota temporária de debug
+    Route::get('/debug-roles', function () {
+        $user = auth()->user();
+        return response()->json([
+            'user' => $user->name,
+            'email' => $user->email,
+            'roles' => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name'),
+            'hasAdminRole' => $user->hasRole('admin'),
+        ]);
+    })->name('debug.roles');
+    
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('permission:dashboard.view')
         ->name('dashboard');
