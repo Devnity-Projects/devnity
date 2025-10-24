@@ -170,7 +170,7 @@ class ProjectController extends Controller
     public function show(Project $project): InertiaResponse
     {
         // Carregar apenas o necessário
-        $project->load(['client:id,name']);
+        $project->load(['client:id,name,email']);
 
         // Em vez de trazer todas as tasks (potencialmente muitas), calcular estatísticas via consultas agregadas
         $taskStats = [
@@ -185,6 +185,32 @@ class ProjectController extends Controller
 
         // Calcular progresso baseado em tarefas
         $progress = $project->task_based_progress;
+
+        // Adicionar labels traduzidos
+        $project->status_label = match($project->status) {
+            Project::STATUS_PLANNING => 'Planejamento',
+            Project::STATUS_IN_PROGRESS => 'Em Andamento',
+            Project::STATUS_ON_HOLD => 'Pausado',
+            Project::STATUS_COMPLETED => 'Concluído',
+            Project::STATUS_CANCELLED => 'Cancelado',
+            default => $project->status,
+        };
+
+        $project->priority_label = match($project->priority) {
+            Project::PRIORITY_LOW => 'Baixa',
+            Project::PRIORITY_MEDIUM => 'Média',
+            Project::PRIORITY_HIGH => 'Alta',
+            Project::PRIORITY_URGENT => 'Urgente',
+            default => $project->priority,
+        };
+
+        $project->type_label = match($project->type) {
+            Project::TYPE_DEVELOPMENT => 'Desenvolvimento',
+            Project::TYPE_MAINTENANCE => 'Manutenção',
+            Project::TYPE_SUPPORT => 'Suporte',
+            Project::TYPE_CONSULTATION => 'Consultoria',
+            default => $project->type,
+        };
 
         return Inertia::render('Projects/Show', [
             'project' => $project,

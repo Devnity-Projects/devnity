@@ -17,7 +17,6 @@ import {
   Search,
   Menu,
   X,
-  Code2,
   Zap,
   Shield,
   Rocket
@@ -169,10 +168,10 @@ onMounted(() => {
 
           <!-- Logo -->
           <Link href="/dashboard" class="flex items-center gap-3 group">
-            <div class="relative">
-              <div class="absolute inset-0 devnity-gradient rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
-              <div class="relative bg-white dark:bg-gray-900 p-2 rounded-lg">
-                <Code2 class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <div class="relative w-10 h-10">
+              <div class="absolute inset-0 bg-blue-500 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div class="relative bg-white dark:bg-gray-900 p-1.5 rounded-full shadow-lg w-full h-full flex items-center justify-center">
+                <img src="/images/logo.png" alt="Devnity" class="w-full h-full object-cover rounded-full" />
               </div>
             </div>
             <div class="hidden sm:block">

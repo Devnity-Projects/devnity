@@ -69,12 +69,15 @@ Route::middleware(['auth', 'sync.ldap.groups'])->group(function () {
     // Rotas de projetos
     Route::middleware('permission:projects.view')->group(function () {
         Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
-        Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     });
     
     Route::middleware('permission:projects.create')->group(function () {
         Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
         Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+    });
+    
+    Route::middleware('permission:projects.view')->group(function () {
+        Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     });
     
     Route::middleware('permission:projects.edit')->group(function () {

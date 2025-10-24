@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Sun, Moon, Code2, Zap, Shield, Rocket } from 'lucide-vue-next'
+import { Sun, Moon, Zap, Shield, Rocket } from 'lucide-vue-next'
 
 // Dark mode
 const isDark = ref(
@@ -67,8 +67,11 @@ const features = [
         <!-- Logo and Brand -->
         <div class="mb-12">
           <div class="flex items-center gap-4 mb-6">
-            <div class="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-              <Code2 class="h-12 w-12 text-white" />
+            <div class="relative w-16 h-16">
+              <div class="absolute inset-0 bg-white rounded-full blur-xl opacity-40"></div>
+              <div class="relative flex items-center justify-center w-full h-full">
+                <img src="/images/logo.png" alt="Devnity" class="w-16 h-16 object-contain" />
+              </div>
             </div>
             <div>
               <h1 class="text-4xl font-bold">Devnity</h1>
@@ -120,8 +123,11 @@ const features = [
         <!-- Mobile Logo -->
         <div class="lg:hidden text-center mb-8">
           <div class="inline-flex items-center gap-3 mb-4">
-            <div class="p-2 devnity-gradient rounded-xl">
-              <Code2 class="h-8 w-8 text-white" />
+            <div class="relative w-12 h-12">
+              <div class="absolute inset-0 bg-blue-500 rounded-full blur-lg opacity-50"></div>
+              <div class="relative flex items-center justify-center w-full h-full">
+                <img src="/images/logo.png" alt="Devnity" class="w-12 h-12 object-contain" />
+              </div>
             </div>
             <div>
               <h1 class="text-2xl font-bold devnity-text-gradient">Devnity</h1>
