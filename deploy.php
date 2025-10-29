@@ -102,13 +102,35 @@ task('npm:install', function () {
     dockerRun('npm ci', ['timeout' => 1800, 'force_run' => true]);
 });
 
+desc('Preparar ambiente para build (copiar .env)');
+task('build:prepare', function () {
+    info('🔧 Preparando ambiente de build...');
+    // Garante que o .env está disponível no release_path antes do build
+    run('cp -f {{deploy_path}}/shared/.env {{release_path}}/.env || true');
+    info('✅ Arquivo .env copiado para o release path');
+});
+
 desc('Compilar assets com Vite');
 task('npm:build', function () {
     info('⚡ Compilando assets com Vite...');
+    // Debug: Verifica se o .env está presente e se VITE_GOOGLE_ANALYTICS_ID está definido
+    try {
+        $debugEnv = dockerRun('cat .env | grep -E "^(GOOGLE_ANALYTICS_ID|VITE_GOOGLE_ANALYTICS_ID|VITE_APP_NAME)" || true', ['timeout' => 30, 'force_run' => true]);
+        if (!empty(trim($debugEnv))) {
+            info('📋 Variáveis de ambiente detectadas:');
+            info($debugEnv);
+        } else {
+            warning('⚠️ Nenhuma variável VITE_ encontrada no .env durante o build!');
+        }
+    } catch (\Exception $e) {
+        warning('⚠️ Não foi possível verificar variáveis de ambiente: ' . $e->getMessage());
+    }
+    
     dockerRun('npm run build', ['timeout' => 1800, 'force_run' => true]);
 });
 
 task('build:assets', [
+    'build:prepare',
     'npm:install',
     'npm:build',
 ])->desc('Instalar dependências NPM e compilar assets');

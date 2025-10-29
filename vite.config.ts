@@ -33,4 +33,8 @@ export default defineConfig({
             },
         },
     },
+    define: {
+        // Garante que import.meta.env.VITE_* seja injetado corretamente
+        'import.meta.env': JSON.stringify(process.env),
+    },
 });
