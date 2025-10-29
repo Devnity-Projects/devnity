@@ -43,7 +43,16 @@
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '{{ env('GOOGLE_ANALYTICS_ID') }}');
+            gtag('config', '{{ env('GOOGLE_ANALYTICS_ID') }}', {
+                'anonymize_ip': true,
+                'allow_google_signals': false,
+                'allow_ad_personalization_signals': false
+            });
+            console.log('[Analytics] Google Analytics initialized with ID: {{ env('GOOGLE_ANALYTICS_ID') }}');
+        </script>
+        @else
+        <script>
+            console.warn('[Analytics] Google Analytics ID not configured. Check your .env file.');
         </script>
         @endif
 
